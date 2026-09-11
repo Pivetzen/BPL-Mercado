@@ -171,6 +171,8 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
             <h3 id="modal-list-title" class="font-bold text-lg text-slate-800">Nova Lista de Compras</h3>
             <input type="hidden" id="modal-list-id">
+            <input type="hidden" id="modal-item-imagem" value="">
+            <input type="hidden" id="modal-item-marca" value="">
             <div>
                 <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Título da Lista</label>
                 <input type="text" id="modal-list-name-input" placeholder="Ex: Supermercado Mensal" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
@@ -183,7 +185,7 @@
                     <div class="sm:col-span-5 relative">
                         <input type="text" id="modal-item-name" placeholder="Nome do Produto" oninput="searchProductByName(this.value)" autocomplete="off" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
                         <!-- Dropdown de Autocomplete para Nome -->
-                        <div id="product-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto z-50 text-xs divide-y"></div>
+                        <div id="product-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50 text-xs divide-y"></div>
                     </div>
                     <input type="number" id="modal-item-qtd" placeholder="Qtd" value="1" min="1" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
                 </div>
@@ -367,8 +369,19 @@
                             </div>
                             <p class="text-xs text-slate-500 mt-1">${totalItens} ${totalItens === 1 ? 'item cadastrado' : 'itens cadastrados'}</p>
                         </div>
-                        <div class="border-t pt-2 max-h-32 overflow-y-auto space-y-1">
-                            ${totalItens === 0 ? '<p class="text-xs text-slate-400 italic">Nenhum item nesta lista.</p>' : itens.map(i => `<div class="text-xs text-slate-700 flex justify-between"><span>• ${i.nome} (Qtd: ${i.quantidade || 1})</span><span class="text-slate-400">${i.ean || ''}</span></div>`).join('')}
+                        <div class="border-t pt-2 max-h-32 overflow-y-auto space-y-2">
+                            ${totalItens === 0 ? '<p class="text-xs text-slate-400 italic">Nenhum item nesta lista.</p>' : itens.map(i => `
+                                <div class="text-xs text-slate-700 flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        ${i.imagem_url ? `<img src="${i.imagem_url}" class="w-8 h-8 object-contain rounded border bg-white">` : `<div class="w-8 h-8 bg-slate-100 rounded border flex items-center justify-center text-[10px] text-slate-400">📦</div>`}
+                                        <div>
+                                            <p class="font-medium">${i.nome}</p>
+                                            <p class="text-[10px] text-slate-400">${i.marca ? i.marca + ' • ' : ''}EAN: ${i.ean || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-semibold bg-slate-100 px-2 py-0.5 rounded text-slate-600">Qtd: ${i.quantidade || 1}</span>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 `;
@@ -377,15 +390,19 @@
             loadActiveListSelector();
         }
 
+        // BUSCA INTEGRADA NA BASE PROPRIA DE PRODUTOS (EAN)
         async function searchProductByEan(ean) {
             if (!ean || ean.length < 3) return;
-            // Busca na tabela de itens já cadastrados pelo usuário ou base global se houver
-            const { data } = await supabaseClient.from('itens_lista').select('nome, ean').eq('ean', ean).limit(1);
-            if (data && data.length > 0) {
-                document.getElementById('modal-item-name').value = data[0].nome;
+            const { data, error } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean.trim()).maybeSingle();
+            
+            if (data) {
+                document.getElementById('modal-item-name').value = data.nome;
+                document.getElementById('modal-item-marca').value = data.marca || '';
+                document.getElementById('modal-item-imagem').value = data.imagem_url || '';
             }
         }
 
+        // BUSCA INTEGRADA NA BASE PROPRIA DE PRODUTOS (NOME / AUTOCOMPLETE)
         async function searchProductByName(termo) {
             const dropdown = document.getElementById('product-suggestions');
             if (!termo || termo.length < 2) {
@@ -393,8 +410,7 @@
                 return;
             }
 
-            // Pesquisa itens salvos anteriormente na base de itens
-            const { data } = await supabaseClient.from('itens_lista').select('nome, ean').ilike('nome', `%${termo}%`).limit(5);
+            const { data, error } = await supabaseClient.from('produtos_base').select('*').ilike('nome', `%${termo.trim()}%`).limit(10);
             
             if (!data || data.length === 0) {
                 dropdown.classList.add('hidden');
@@ -402,17 +418,25 @@
             }
 
             dropdown.innerHTML = data.map(prod => `
-                <div class="p-2 hover:bg-slate-100 cursor-pointer flex justify-between items-center" onclick="selectProductSuggestion('${prod.ean || ''}', '${prod.nome.replace(/'/g, "\\'")}')">
-                    <span class="font-medium text-slate-700">${prod.nome}</span>
-                    <span class="text-slate-400 text-[10px]">${prod.ean || 'Sem EAN'}</span>
+                <div class="p-2 hover:bg-slate-100 cursor-pointer flex items-center justify-between gap-2" onclick="selectProductSuggestion('${prod.ean || ''}', '${prod.nome.replace(/'/g, "\\'")}', '${prod.marca || ''}', '${prod.imagem_url || ''}')">
+                    <div class="flex items-center gap-2">
+                        ${prod.imagem_url ? `<img src="${prod.imagem_url}" class="w-8 h-8 object-contain rounded border bg-white">` : `<div class="w-8 h-8 bg-slate-100 rounded border flex items-center justify-center text-[10px]">📦</div>`}
+                        <div>
+                            <p class="font-medium text-slate-700">${prod.nome}</p>
+                            <p class="text-[10px] text-slate-400">${prod.marca || 'Sem Marca'} • EAN: ${prod.ean || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <span class="text-indigo-600 text-xs font-semibold">+ Selecionar</span>
                 </div>
             `).join('');
             dropdown.classList.remove('hidden');
         }
 
-        function selectProductSuggestion(ean, nome) {
+        function selectProductSuggestion(ean, nome, marca, imagem_url) {
             document.getElementById('modal-item-ean').value = ean;
             document.getElementById('modal-item-name').value = nome;
+            document.getElementById('modal-item-marca').value = marca;
+            document.getElementById('modal-item-imagem').value = imagem_url;
             document.getElementById('product-suggestions').classList.add('hidden');
         }
 
@@ -420,6 +444,8 @@
             document.getElementById('modal-list-id').value = id;
             document.getElementById('modal-list-name-input').value = titulo;
             tempModalItems = [];
+            document.getElementById('modal-item-imagem').value = '';
+            document.getElementById('modal-item-marca').value = '';
             document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
             document.getElementById('list-modal').classList.remove('hidden');
             if(id) {
@@ -433,7 +459,7 @@
         async function loadModalExistingItems(listaId) {
             const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', listaId);
             if(data) {
-                tempModalItems = data.map(i => ({ id: i.id, ean: i.ean, nome: i.nome, quantidade: i.quantidade || 1, salvoNoBanco: true }));
+                tempModalItems = data.map(i => ({ id: i.id, ean: i.ean, nome: i.nome, marca: i.marca, imagem_url: i.imagem_url, quantidade: i.quantidade || 1, salvoNoBanco: true }));
                 renderModalItemsPreview();
             }
         }
@@ -445,13 +471,19 @@
         function addItemToModalListTemp() {
             const ean = document.getElementById('modal-item-ean').value.trim();
             const nome = document.getElementById('modal-item-name').value.trim();
+            const marca = document.getElementById('modal-item-marca').value.trim();
+            const imagem_url = document.getElementById('modal-item-imagem').value.trim();
             const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;
             
             if(!ean || !nome) return alert('Informe o EAN e o Nome do item.');
 
-            tempModalItems.push({ ean, nome, quantidade, salvoNoBanco: false });
+            tempModalItems.push({ ean, nome, marca, imagem_url, quantidade, salvoNoBanco: false });
+            
+            // Limpa os campos para o próximo item
             document.getElementById('modal-item-ean').value = '';
             document.getElementById('modal-item-name').value = '';
+            document.getElementById('modal-item-marca').value = '';
+            document.getElementById('modal-item-imagem').value = '';
             document.getElementById('modal-item-qtd').value = '1';
             document.getElementById('product-suggestions').classList.add('hidden');
             renderModalItemsPreview();
@@ -464,8 +496,14 @@
                 return;
             }
             preview.innerHTML = tempModalItems.map((item, idx) => `
-                <div class="flex justify-between items-center py-1">
-                    <span>${item.nome} (Qtd: ${item.quantidade}) - <span class="text-slate-400">${item.ean}</span></span>
+                <div class="flex justify-between items-center py-1.5 gap-2">
+                    <div class="flex items-center gap-2">
+                        ${item.imagem_url ? `<img src="${item.imagem_url}" class="w-7 h-7 object-contain rounded border bg-white">` : `<div class="w-7 h-7 bg-slate-100 rounded border flex items-center justify-center text-[10px]">📦</div>`}
+                        <div>
+                            <p class="font-medium text-slate-800">${item.nome} <span class="text-slate-500 font-normal">(Qtd: ${item.quantidade})</span></p>
+                            <p class="text-[10px] text-slate-400">EAN: ${item.ean || 'N/A'}</p>
+                        </div>
+                    </div>
                     <button onclick="removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold px-2">×</button>
                 </div>
             `).join('');
@@ -496,7 +534,12 @@
             for(let item of tempModalItems) {
                 if(!item.salvoNoBanco) {
                     await supabaseClient.from('itens_lista').insert([{
-                        lista_id: currentListId, ean: item.ean, nome: item.nome, quantidade: item.quantidade
+                        lista_id: currentListId, 
+                        ean: item.ean, 
+                        nome: item.nome, 
+                        marca: item.marca, 
+                        imagem_url: item.imagem_url, 
+                        quantidade: item.quantidade
                     }]);
                 }
             }
@@ -592,9 +635,12 @@
 
                 return `
                     <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm hover:bg-slate-50 transition">
-                        <div class="cursor-pointer flex-1" onclick="handleItemClickAction('${item.id}', ${item.comprado || item.cancelado || item.substituido})">
-                            <p class="font-semibold ${statusStyle}">${item.nome} <span class="text-xs text-slate-500 font-normal">(Qtd: ${item.quantidade || 1})</span></p>
-                            <p class="text-xs text-slate-400">EAN: ${item.ean || 'N/A'}</p>
+                        <div class="cursor-pointer flex items-center gap-3 flex-1" onclick="handleItemClickAction('${item.id}', ${item.comprado || item.cancelado || item.substituido})">
+                            ${item.imagem_url ? `<img src="${item.imagem_url}" class="w-10 h-10 object-contain rounded border bg-white">` : `<div class="w-10 h-10 bg-slate-100 rounded border flex items-center justify-center text-xs text-slate-400">📦</div>`}
+                            <div>
+                                <p class="font-semibold ${statusStyle}">${item.nome} <span class="text-xs text-slate-500 font-normal">(Qtd: ${item.quantidade || 1})</span></p>
+                                <p class="text-xs text-slate-400">${item.marca ? item.marca + ' • ' : ''}EAN: ${item.ean || 'N/A'}</p>
+                            </div>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
                             ${statusText}
@@ -627,8 +673,17 @@
 
             if(!ean || !nome || isNaN(preco)) return alert('Preencha EAN, Nome e Preço do item extra.');
 
+            // Tenta buscar imagem e marca se houver na base de produtos
+            let imagem_url = '';
+            let marca = '';
+            const { data } = await supabaseClient.from('produtos_base').select('marca, imagem_url').eq('ean', ean).maybeSingle();
+            if(data) {
+                marca = data.marca || '';
+                imagem_url = data.imagem_url || '';
+            }
+
             await supabaseClient.from('itens_lista').insert([{
-                lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true, extra: true, quantidade: 1
+                lista_id: activeLiveListId, ean, nome, marca, imagem_url, preco_pago: preco, comprado: true, extra: true, quantidade: 1
             }]);
 
             document.getElementById('live-ean').value = '';
@@ -676,11 +731,18 @@
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 15, qrbox: { width: 250, height: 100 }, aspectRatio: 1.777778 },
-                (decodedText) => {
+                async (decodedText) => {
                     document.getElementById('live-ean').value = decodedText;
-                    let match = currentLiveItems.find(i => i.ean === decodedText);
-                    if(match) {
-                        document.getElementById('live-name').value = match.nome;
+                    
+                    // Busca automatizada ao bipar no Live Market
+                    const { data } = await supabaseClient.from('produtos_base').select('nome').eq('ean', decodedText).maybeSingle();
+                    if(data) {
+                        document.getElementById('live-name').value = data.nome;
+                    } else {
+                        let match = currentLiveItems.find(i => i.ean === decodedText);
+                        if(match) {
+                            document.getElementById('live-name').value = match.nome;
+                        }
                     }
                     stopScanner();
                 },
