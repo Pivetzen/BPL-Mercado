@@ -214,6 +214,7 @@
         let activeLiveListId = null;
         let currentLiveItems = [];
         let tempModalItems = [];
+        let deletedModalItemIds = []; // Controla itens removidos na edição
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             currentUser = session?.user || null;
@@ -444,6 +445,7 @@
             document.getElementById('modal-list-id').value = id;
             document.getElementById('modal-list-name-input').value = titulo;
             tempModalItems = [];
+            deletedModalItemIds = [];
             document.getElementById('modal-item-imagem').value = '';
             document.getElementById('modal-item-marca').value = '';
             document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
@@ -504,12 +506,16 @@
                             <p class="text-[10px] text-slate-400">EAN: ${item.ean || 'N/A'}</p>
                         </div>
                     </div>
-                    <button onclick="removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold px-2">×</button>
+                    <button type="button" onclick="removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold px-2">×</button>
                 </div>
             `).join('');
         }
 
         function removeTempModalItem(idx) {
+            const removed = tempModalItems[idx];
+            if (removed && removed.salvoNoBanco && removed.id) {
+                deletedModalItemIds.push(removed.id);
+            }
             tempModalItems.splice(idx, 1);
             renderModalItemsPreview();
         }
@@ -531,6 +537,12 @@
                 await supabaseClient.from('minhas_listas').update({ titulo }).eq('id', currentListId);
             }
 
+            // Remove do banco os itens que foram excluídos pelo usuário no modal
+            if(deletedModalItemIds.length > 0) {
+                await supabaseClient.from('itens_lista').delete().in('id', deletedModalItemIds);
+            }
+
+            // Insere apenas os novos itens criados que não estavam salvos no banco
             for(let item of tempModalItems) {
                 if(!item.salvoNoBanco) {
                     await supabaseClient.from('itens_lista').insert([{
