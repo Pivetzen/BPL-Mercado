@@ -181,12 +181,17 @@
             <div class="border-t pt-3 space-y-2 relative">
                 <h4 class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                    <input type="text" id="modal-item-ean" placeholder="EAN (Opcional)" oninput="searchProductByEan(this.value)" class="sm:col-span-4 px-3 py-2 border rounded-lg text-sm outline-none">
-                    <div class="sm:col-span-5 relative">
-                        <input type="text" id="modal-item-name" placeholder="Nome do Produto ou EAN" oninput="searchProductByNameOrEan(this.value)" autocomplete="off" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
-                        <!-- Dropdown de Autocomplete para Nome / EAN -->
-                        <div id="product-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50 text-xs divide-y"></div>
+                    <input type="text" id="modal-item-ean" placeholder="EAN (Opcional)" oninput="searchProductByEan(this.value)" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
+                    
+                    <div class="sm:col-span-6 relative">
+                        <div class="flex">
+                            <input type="text" id="modal-item-name" placeholder="Nome do Produto ou EAN" oninput="searchProductByNameOrEan(this.value)" autocomplete="off" class="w-full px-3 py-2 border rounded-l-lg text-sm outline-none">
+                            <button type="button" onclick="searchProductByNameOrEan(document.getElementById('modal-item-name').value)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 text-xs font-medium rounded-r-lg transition">🔍 Buscar</button>
+                        </div>
+                        <!-- Dropdown de Autocomplete / Resultados -->
+                        <div id="product-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border rounded-lg shadow-xl max-h-56 overflow-y-auto z-50 text-xs divide-y"></div>
                     </div>
+
                     <input type="number" id="modal-item-qtd" placeholder="Qtd" value="1" min="1" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
                 </div>
                 <button type="button" onclick="addItemToModalListTemp()" class="w-full bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition mt-1">+ Adicionar Item</button>
@@ -401,37 +406,37 @@
             }
         }
 
-        // BUSCA INTEGRADA POR NOME OU EAN COM MENU SUSPENSO
+        // BUSCA POR NOME OU EAN COM MENU SUSPENSO
         async function searchProductByNameOrEan(termo) {
             const dropdown = document.getElementById('product-suggestions');
-            if (!termo || termo.length < 2) {
+            if (!termo || termo.trim().length < 1) {
                 dropdown.classList.add('hidden');
                 return;
             }
 
             const termoTrim = termo.trim();
-            // Busca por nome contendo o termo OU por EAN exato/parcial
             const { data } = await supabaseClient
                 .from('produtos_base')
                 .select('*')
                 .or(`nome.ilike.%${termoTrim}%,ean.ilike.%${termoTrim}%`)
-                .limit(10);
+                .limit(15);
             
             if (!data || data.length === 0) {
-                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '<div class="p-3 text-slate-400 text-center">Nenhum produto encontrado na base.</div>';
+                dropdown.classList.remove('hidden');
                 return;
             }
 
             dropdown.innerHTML = data.map(prod => `
-                <div class="p-2 hover:bg-slate-100 cursor-pointer flex items-center justify-between gap-2" onclick="selectProductSuggestion('${prod.ean || ''}', '${prod.nome.replace(/'/g, "\\'")}', '${prod.marca || ''}', '${prod.imagem_url || ''}')">
+                <div class="p-2.5 hover:bg-slate-100 cursor-pointer flex items-center justify-between gap-2" onclick="selectProductSuggestion('${prod.ean || ''}', '${prod.nome.replace(/'/g, "\\'")}', '${prod.marca || ''}', '${prod.imagem_url || ''}')">
                     <div class="flex items-center gap-2">
                         ${prod.imagem_url ? `<img src="${prod.imagem_url}" class="w-8 h-8 object-contain rounded border bg-white">` : `<div class="w-8 h-8 bg-slate-100 rounded border flex items-center justify-center text-[10px]">📦</div>`}
                         <div>
-                            <p class="font-medium text-slate-700">${prod.nome}</p>
+                            <p class="font-medium text-slate-800">${prod.nome}</p>
                             <p class="text-[10px] text-slate-400">${prod.marca || 'Sem Marca'} • EAN: ${prod.ean || 'N/A'}</p>
                         </div>
                     </div>
-                    <span class="text-indigo-600 text-xs font-semibold">+ Selecionar</span>
+                    <span class="text-indigo-600 text-xs font-semibold bg-indigo-50 px-2 py-1 rounded">Selecionar</span>
                 </div>
             `).join('');
             dropdown.classList.remove('hidden');
@@ -454,6 +459,7 @@
             document.getElementById('modal-item-name').value = '';
             document.getElementById('modal-item-imagem').value = '';
             document.getElementById('modal-item-marca').value = '';
+            document.getElementById('product-suggestions').classList.add('hidden');
             document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
             document.getElementById('list-modal').classList.remove('hidden');
             if(id) {
@@ -483,12 +489,10 @@
             let imagem_url = document.getElementById('modal-item-imagem').value.trim();
             const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;
             
-            // Valida se pelo menos um dos dois (EAN ou Nome) foi preenchido
             if(!ean && !nome) {
                 return alert('Preencha pelo menos o EAN ou o Nome do produto.');
             }
 
-            // Se preencheu o EAN mas não o nome, tenta buscar automático na base
             if(ean && !nome) {
                 const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean).maybeSingle();
                 if(data) {
@@ -498,9 +502,7 @@
                 } else {
                     nome = `Produto (${ean})`;
                 }
-            } 
-            // Se preencheu o nome mas não o EAN, tenta buscar se já existe na base para puxar imagem/marca
-            else if(nome && !ean) {
+            } else if(nome && !ean) {
                 const { data } = await supabaseClient.from('produtos_base').select('*').ilike('nome', nome).maybeSingle();
                 if(data) {
                     ean = data.ean || '';
@@ -511,7 +513,6 @@
 
             tempModalItems.push({ ean, nome, marca, imagem_url, quantidade, salvoNoBanco: false });
             
-            // Limpa os campos para o próximo item
             document.getElementById('modal-item-ean').value = '';
             document.getElementById('modal-item-name').value = '';
             document.getElementById('modal-item-marca').value = '';
