@@ -205,7 +205,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE INTEGRAÇÃO -->
+<!-- SCRIPT DE INTEGRAÇÃO -->
     <script>
         const SUPABASE_URL = 'https://xjaawuwtcvdnsodmzbdj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYWF3dXd0Y3ZkbnNvZG16YmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjgyMDIsImV4cCI6MjEwNDcwNDIwMn0.w6WeHDMNEg-pG_1G34psLz3Qh7PcNQUPFYSuCcr_VRA';
@@ -406,7 +406,7 @@
             }
         }
 
-        // BUSCA POR NOME OU EAN COM MENU SUSPENSO
+        // BUSCA ROBUSTA POR NOME OU EAN NA BASE DE DADOS
         async function searchProductByNameOrEan(termo) {
             const dropdown = document.getElementById('product-suggestions');
             if (!termo || termo.trim().length < 1) {
@@ -415,11 +415,26 @@
             }
 
             const termoTrim = termo.trim();
-            const { data } = await supabaseClient
+            
+            // Consulta separada em vez de .or() para garantir compatibilidade total com a tabela produtos_base
+            const { data: dataNome } = await supabaseClient
                 .from('produtos_base')
                 .select('*')
-                .or(`nome.ilike.%${termoTrim}%,ean.ilike.%${termoTrim}%`)
-                .limit(15);
+                .ilike('nome', `%${termoTrim}%`)
+                .limit(10);
+
+            const { data: dataEan } = await supabaseClient
+                .from('produtos_base')
+                .select('*')
+                .ilike('ean', `%${termoTrim}%`)
+                .limit(10);
+
+            // Mescla e remove duplicatas por ID ou EAN/Nome
+            const mapUnico = new Map();
+            if (dataNome) dataNome.forEach(item => mapUnico.set(item.id || item.ean + item.nome, item));
+            if (dataEan) dataEan.forEach(item => mapUnico.set(item.id || item.ean + item.nome, item));
+            
+            const data = Array.from(mapUnico.values());
             
             if (!data || data.length === 0) {
                 dropdown.innerHTML = '<div class="p-3 text-slate-400 text-center">Nenhum produto encontrado na base.</div>';
