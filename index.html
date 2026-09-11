@@ -16,7 +16,7 @@
             <h1 class="text-2xl font-bold text-center text-slate-900 mb-2">SmartMarket</h1>
             <p class="text-sm text-slate-500 text-center mb-6">Faça login para acessar suas listas</p>
             
-            <form id="auth-form" class="space-y-4">
+            <form id="auth-form" class="space-y-4" onsubmit="return false;">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">E-mail</label>
                     <input type="email" id="email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -27,18 +27,18 @@
                 </div>
                 <div id="auth-error" class="text-red-500 text-xs hidden"></div>
                 <div class="flex gap-2 pt-2">
-                    <button type="submit" onclick="handleAuth('login')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition">Entrar</button>
+                    <button type="button" onclick="handleAuth('login')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition">Entrar</button>
                     <button type="button" onclick="handleAuth('signup')" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg transition">Cadastrar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- TELA DE CONTA BLOQUEADA -->
+    <!-- TELA DE CONTA BLOQUEADA / EXPIRADA -->
     <div id="pending-screen" class="hidden fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center space-y-4">
-            <h1 class="text-2xl font-bold text-red-600" id="status-title">Acesso Bloqueado</h1>
-            <p class="text-sm text-slate-600" id="status-desc">Sua conta foi bloqueada pelo administrador do sistema.</p>
+            <h1 class="text-2xl font-bold text-red-600" id="status-title">Acesso Restrito</h1>
+            <p class="text-sm text-slate-600" id="status-desc">Sua conta está bloqueada ou o período de acesso expirou.</p>
             <button onclick="logout()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg transition">Sair / Trocar Conta</button>
         </div>
     </div>
@@ -111,9 +111,18 @@
             <!-- SEÇÃO 3: PAINEL ADMIN -->
             <section id="section-admin" class="hidden space-y-4">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-4 border-b bg-slate-50">
-                        <h3 class="font-bold text-slate-700">Gerenciamento de Usuários</h3>
-                        <p class="text-xs text-slate-500">Aprove ou bloqueie o acesso dos usuários cadastrados.</p>
+                    <div class="p-4 border-b bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="font-bold text-slate-700">Gerenciamento de Usuários</h3>
+                            <p class="text-xs text-slate-500">Filtre, aprove, defina validades e gerencie o acesso.</p>
+                        </div>
+                        <!-- Filtros por Status -->
+                        <div class="flex gap-1 bg-slate-200 p-1 rounded-lg text-xs font-medium">
+                            <button onclick="filterAdminUsers('todos')" id="filter-todos" class="px-3 py-1.5 rounded-md bg-white shadow-sm text-slate-800 transition">Todos</button>
+                            <button onclick="filterAdminUsers('ativo')" id="filter-ativo" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Ativos</button>
+                            <button onclick="filterAdminUsers('trial')" id="filter-trial" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Trial</button>
+                            <button onclick="filterAdminUsers('bloqueado')" id="filter-bloqueado" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Bloqueados</button>
+                        </div>
                     </div>
                     <div id="admin-users-list" class="divide-y divide-slate-100"></div>
                 </div>
@@ -130,6 +139,8 @@
 
         let currentUser = null;
         let html5QrCode = null;
+        let allUsersCache = [];
+        let currentFilter = 'todos';
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             currentUser = session?.user || null;
@@ -137,7 +148,6 @@
             if (currentUser) {
                 document.getElementById('auth-screen').classList.add('hidden');
                 
-                // Buscar perfil e status do usuário atual
                 const { data: perfil } = await supabaseClient
                     .from('perfis')
                     .select('*')
@@ -145,11 +155,19 @@
                     .single();
 
                 const isAdmin = currentUser.email === 'pivetzen@gmail.com';
+                const hojeStr = new Date().toISOString().split('T')[0];
 
-                // Apenas bloqueados ficam sem acesso. Trial e Ativo entram normalmente.
-                if (perfil && perfil.status === 'bloqueado' && !isAdmin) {
+                // Verificar se está bloqueado ou com plano vencido (e não for admin)
+                const estaBloqueado = perfil && perfil.status === 'bloqueado';
+                const estaVencido = perfil && perfil.data_validade && perfil.data_validade < hojeStr;
+
+                if ((estaBloqueado || estaVencido) && !isAdmin) {
                     document.getElementById('app-screen').classList.add('hidden');
                     document.getElementById('pending-screen').classList.remove('hidden');
+                    if (estaVencido) {
+                        document.getElementById('status-title').textContent = 'Plano Expirado';
+                        document.getElementById('status-desc').textContent = 'O período de validade do seu plano expirou. Contate o administrador.';
+                    }
                     return;
                 }
 
@@ -175,7 +193,6 @@
         });
 
         async function handleAuth(type) {
-            event.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorEl = document.getElementById('auth-error');
@@ -217,35 +234,106 @@
             }
         }
 
-        // --- PAINEL ADMIN ---
+        // --- PAINEL ADMIN COM FILTROS E CORES DE VENCIMENTO ---
         async function loadAdminUsers() {
             const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
-            const listEl = document.getElementById('admin-users-list');
             if (error || !data) {
-                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Erro ao carregar usuários.</p>';
+                document.getElementById('admin-users-list').innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Erro ao carregar usuários.</p>';
+                return;
+            }
+            allUsersCache = data;
+            renderAdminList();
+        }
+
+        function filterAdminUsers(status) {
+            currentFilter = status;
+            ['todos', 'ativo', 'trial', 'bloqueado'].forEach(s => {
+                const btn = document.getElementById(`filter-${s}`);
+                if (s === status) {
+                    btn.className = 'px-3 py-1.5 rounded-md bg-white shadow-sm text-slate-800 transition font-semibold';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition';
+                }
+            });
+            renderAdminList();
+        }
+
+        function renderAdminList() {
+            const listEl = document.getElementById('admin-users-list');
+            let filtered = allUsersCache;
+
+            if (currentFilter !== 'todos') {
+                filtered = allUsersCache.filter(u => u.status === currentFilter);
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum usuário encontrado com este filtro.</p>';
                 return;
             }
 
-            listEl.innerHTML = data.map(user => `
-                <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm">
-                    <div>
-                        <p class="font-semibold text-slate-800">${user.email}</p>
-                        <p class="text-xs text-slate-500">Status atual: <span class="uppercase font-bold text-indigo-600">${user.status}</span></p>
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+
+            listEl.innerHTML = filtered.map(user => {
+                // Formatar Data de Cadastro
+                let dataCriacaoFmt = 'N/D';
+                if (user.criado_em) {
+                    const d = new Date(user.criado_em);
+                    dataCriacaoFmt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                }
+
+                // Cálculo de cores para o card com base na data de validade
+                let bgCardColor = 'bg-white';
+                if (user.data_validade) {
+                    const partesVal = user.data_validade.split('-');
+                    const dataVal = new Date(partesVal[0], partesVal[1] - 1, partesVal[2]);
+                    dataVal.setHours(0,0,0,0);
+
+                    const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
+
+                    if (diffDias < 0) {
+                        bgCardColor = 'bg-red-50 border-l-4 border-red-500'; // Vencido
+                    } else if (diffDias <= 3) {
+                        bgCardColor = 'bg-amber-50 border-l-4 border-amber-500'; // Próximo de vencer (3 dias ou menos)
+                    }
+                }
+
+                return `
+                    <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm ${bgCardColor} transition">
+                        <div>
+                            <p class="font-semibold text-slate-800">${user.email}</p>
+                            <p class="text-xs text-slate-500">Cadastrado em: <span class="font-medium text-slate-700">${dataCriacaoFmt}</span></p>
+                            <p class="text-xs text-slate-500">Status atual: <span class="uppercase font-bold text-indigo-600">${user.status}</span></p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 w-full sm:w-auto">
+                            <div class="flex flex-col text-xs">
+                                <label class="text-slate-500 font-medium">Validade:</label>
+                                <input type="date" id="val-${user.id}" value="${user.data_validade || ''}" onchange="updateUserValidity('${user.id}')" class="px-2 py-1 border rounded bg-white text-xs outline-none">
+                            </div>
+                            <div class="flex gap-1 flex-wrap pt-1 sm:pt-4">
+                                <button onclick="updateUserStatus('${user.id}', 'ativo')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1.5 rounded transition">Ativar</button>
+                                <button onclick="updateUserStatus('${user.id}', 'trial')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded transition">Trial</button>
+                                <button onclick="updateUserStatus('${user.id}', 'bloqueado')" class="bg-red-500 hover:bg-red-700 text-white text-xs px-2.5 py-1.5 rounded transition">Bloquear</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="updateUserStatus('${user.id}', 'ativo')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded transition">Aprovar / Ativar</button>
-                        <button onclick="updateUserStatus('${user.id}', 'trial')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition">Trial</button>
-                        <button onclick="updateUserStatus('${user.id}', 'bloqueado')" class="bg-red-500 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded transition">Bloquear</button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function updateUserStatus(userId, novoStatus) {
             const { error } = await supabaseClient.from('perfis').update({ status: novoStatus }).eq('id', userId);
             if (error) alert('Erro ao atualizar: ' + error.message);
             else {
-                alert('Status atualizado com sucesso!');
+                loadAdminUsers();
+            }
+        }
+
+        async function updateUserValidity(userId) {
+            const novaData = document.getElementById(`val-${userId}`).value;
+            const { error } = await supabaseClient.from('perfis').update({ data_validade: novaData || null }).eq('id', userId);
+            if (error) alert('Erro ao salvar validade: ' + error.message);
+            else {
                 loadAdminUsers();
             }
         }
