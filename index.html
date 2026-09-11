@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartMarket - Lista de Supermercado</title>
+    <title>SmartMarket - Live Market</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -58,56 +58,96 @@
             </div>
             <!-- Abas de Navegação -->
             <div class="max-w-4xl mx-auto px-4 flex gap-4 border-t border-indigo-500 overflow-x-auto">
-                <button onclick="switchTab('planning')" id="tab-planning" class="py-3 font-medium border-b-2 border-white whitespace-nowrap">Planejamento</button>
-                <button onclick="switchTab('shopping')" id="tab-shopping" class="py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap">No Supermercado</button>
+                <button onclick="switchTab('lists')" id="tab-lists" class="py-3 font-medium border-b-2 border-white whitespace-nowrap">Minhas Listas</button>
+                <button onclick="switchTab('live')" id="tab-live" class="py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap">Live Market</button>
                 <button onclick="switchTab('admin')" id="tab-admin" class="hidden py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap">Painel Admin</button>
             </div>
         </header>
 
         <main class="max-w-4xl mx-auto w-full p-4 flex-1">
             
-            <!-- SEÇÃO 1: PLANEJAMENTO -->
-            <section id="section-planning" class="space-y-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                    <h2 class="font-bold text-slate-700 mb-3">Adicionar à Lista de Planejamento</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <input type="text" id="plan-ean" placeholder="Código EAN ou Nome" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                        <input type="text" id="plan-name" placeholder="Nome do Produto" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                        <button onclick="addItemPlanning()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 rounded-lg transition">Adicionar Item</button>
+            <!-- SEÇÃO 1: MINHAS LISTAS (PLANEJAMENTO) -->
+            <section id="section-lists" class="space-y-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
+                    <div>
+                        <h2 class="font-bold text-slate-700">Criar Nova Lista</h2>
+                        <p class="text-xs text-slate-500">Você pode ter até 2 listas salvas (Limite atingido se ja houver 2).</p>
                     </div>
+                    <button onclick="openCreateListModal()" id="btn-new-list" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">+ Nova Lista</button>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-700">Sua Lista de Planejamento</h3>
-                        <span id="total-estimado" class="text-sm font-semibold text-indigo-600">Total Estimado: R$ 0,00</span>
-                    </div>
-                    <div id="planning-list" class="divide-y divide-slate-100"></div>
+                <div id="user-lists-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Listas injetadas via JS -->
                 </div>
             </section>
 
-            <!-- SEÇÃO 2: NO SUPERMERCADO -->
-            <section id="section-shopping" class="hidden space-y-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
-                    <button onclick="startScanner()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition">Escanear Código de Barras</button>
-                    <div id="scanner-container" class="mt-4 max-w-sm mx-auto hidden"></div>
-                </div>
-
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                    <h3 class="font-bold text-slate-700 mb-2">Registrar Compra do Item</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                        <input type="text" id="shop-ean" placeholder="EAN" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                        <input type="text" id="shop-name" placeholder="Nome do Produto" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                        <input type="number" step="0.01" id="shop-price" placeholder="Preço Pago (R$)" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                        <button onclick="registerPurchase()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 rounded-lg transition">Confirmar Compra</button>
+            <!-- SEÇÃO 2: LIVE MARKET (NO SUPERMERCADO) -->
+            <section id="section-live" class="hidden space-y-4">
+                <!-- Seletor de Lista para a Sessão -->
+                <div id="live-selector-card" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
+                    <h3 class="font-bold text-slate-700">Iniciar Compras (Live Market)</h3>
+                    <p class="text-xs text-slate-500">Selecione qual das suas listas deseja levar para o supermercado:</p>
+                    <div class="flex gap-2">
+                        <select id="select-active-list" class="flex-1 px-3 py-2 border rounded-lg text-sm outline-none bg-white">
+                            <option value="">Selecione uma lista...</option>
+                        </select>
+                        <button onclick="startLiveMarketSession()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition">Iniciar Live Market</button>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-4 border-b bg-slate-50">
-                        <h3 class="font-bold text-slate-700">Itens Comprados Nesta Ida</h3>
+                <!-- Painel Ativo do Live Market -->
+                <div id="live-active-panel" class="hidden space-y-4">
+                    <div class="bg-indigo-900 text-white p-4 rounded-xl shadow flex justify-between items-center">
+                        <div>
+                            <span class="text-xs uppercase tracking-wider text-indigo-300 font-semibold">Live Ativo</span>
+                            <h3 id="live-session-title-label" class="font-bold text-lg">Nome da Lista</h3>
+                        </div>
+                        <button onclick="finishLiveSession()" class="bg-red-500 hover:bg-red-600 text-xs px-3 py-1.5 rounded font-medium transition">Encerrar / Trocar Lista</button>
                     </div>
-                    <div id="shopping-list" class="divide-y divide-slate-100"></div>
+
+                    <!-- Bloco de Bipagem / Entrada do Produto -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-slate-700 text-sm">Leitor / Adicionar Produto</h3>
+                            <button onclick="toggleScanner()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded transition font-medium">📷 Ligar/Desligar Câmera</button>
+                        </div>
+                        
+                        <div id="scanner-container" class="max-w-xs mx-auto hidden rounded-lg overflow-hidden border"></div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2">
+                            <input type="text" id="live-ean" placeholder="Código EAN" class="px-3 py-2 border rounded-lg text-sm outline-none">
+                            <input type="text" id="live-name" placeholder="Nome do Produto" class="px-3 py-2 border rounded-lg text-sm outline-none">
+                            <input type="number" step="0.01" id="live-price" placeholder="Preço Pago (R$)" class="px-3 py-2 border rounded-lg text-sm outline-none">
+                            <div class="flex gap-1">
+                                <button onclick="registerLiveItem(false)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2 rounded-lg transition">Dar Baixa / Comprar</button>
+                                <button onclick="registerLiveItem(true)" title="Adicionar como item extra fora da lista" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-2 rounded-lg transition">+ Extra</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumo do Carrinho e Itens -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
+                                <h3 class="font-bold text-slate-700 text-sm">Itens da Lista (Live)</h3>
+                                <span id="live-progress-count" class="text-xs font-semibold text-slate-500">0 / 0 comprados</span>
+                            </div>
+                            <div id="live-items-list" class="divide-y divide-slate-100"></div>
+                        </div>
+
+                        <!-- Carrinho / Resumo Financeiro -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 space-y-3 h-fit">
+                            <h3 class="font-bold text-slate-700 text-sm border-b pb-2">Resumo da Compra</h3>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500">Total Carrinho:</span>
+                                <span id="live-total-cart" class="font-bold text-emerald-600 text-base">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>Itens Extras:</span>
+                                <span id="live-total-extras">0</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -134,6 +174,33 @@
         </main>
     </div>
 
+    <!-- MODAL CRIAR/EDITAR LISTA -->
+    <div id="list-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <h3 id="modal-list-title" class="font-bold text-lg text-slate-800">Nova Lista de Compras</h3>
+            <input type="hidden" id="modal-list-id">
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Título da Lista</label>
+                <input type="text" id="modal-list-name-input" placeholder="Ex: Supermercado Mensal" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
+            </div>
+            
+            <div class="border-t pt-3 space-y-2">
+                <h4 class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item Inicial</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input type="text" id="modal-item-ean" placeholder="EAN" class="px-3 py-2 border rounded-lg text-sm outline-none">
+                    <input type="text" id="modal-item-name" placeholder="Nome do Produto" class="px-3 py-2 border rounded-lg text-sm outline-none">
+                    <button type="button" onclick="addItemToModalListTemp()" class="bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition">Adicionar Item</button>
+                </div>
+                <div id="modal-items-preview" class="divide-y max-h-40 overflow-y-auto border rounded-lg p-2 bg-slate-50 text-xs"></div>
+            </div>
+
+            <div class="flex gap-2 pt-2 border-t">
+                <button onclick="saveListWithItems()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition">Salvar Lista</button>
+                <button onclick="closeListModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT DE INTEGRAÇÃO -->
     <script>
         const SUPABASE_URL = 'https://xjaawuwtcvdnsodmzbdj.supabase.co';
@@ -144,6 +211,11 @@
         let html5QrCode = null;
         let allUsersCache = [];
         let currentFilter = 'todos';
+        
+        // Estado do Live Market
+        let activeLiveListId = null;
+        let currentLiveItems = [];
+        let tempModalItems = [];
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             currentUser = session?.user || null;
@@ -182,28 +254,17 @@
 
                 document.getElementById('user-badge').textContent = badgeText;
 
-                // Exibir validade no cabeçalho se houver data definida
                 const validityBadge = document.getElementById('user-validity-badge');
                 if (perfil && perfil.data_validade) {
                     const partesVal = perfil.data_validade.split('-');
                     const dataVal = new Date(partesVal[0], partesVal[1] - 1, partesVal[2]);
                     dataVal.setHours(0,0,0,0);
-
                     const hoje = new Date();
                     hoje.setHours(0,0,0,0);
 
                     const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
-                    let textoDias = '';
-                    if (diffDias > 0) {
-                        textoDias = `${diffDias} ${diffDias === 1 ? 'dia restante' : 'dias restantes'}`;
-                    } else if (diffDias === 0) {
-                        textoDias = 'vence hoje';
-                    } else {
-                        textoDias = 'vencido';
-                    }
-
-                    const dataFormatada = dataVal.toLocaleDateString('pt-BR');
-                    validityBadge.textContent = `Validade: ${dataFormatada} (${textoDias})`;
+                    let textoDias = diffDias > 0 ? `${diffDias} dias restantes` : (diffDias === 0 ? 'vence hoje' : 'vencido');
+                    validityBadge.textContent = `Validade: ${dataVal.toLocaleDateString('pt-BR')} (${textoDias})`;
                     validityBadge.classList.remove('hidden');
                 } else {
                     validityBadge.classList.add('hidden');
@@ -211,8 +272,8 @@
 
                 document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);
 
-                loadPlanningList();
-                loadShoppingList();
+                loadUserLists();
+                loadActiveListSelector();
                 if (isAdmin) loadAdminUsers();
 
             } else {
@@ -247,24 +308,373 @@
         }
 
         function switchTab(tab) {
-            const isPlanning = tab === 'planning';
-            const isShopping = tab === 'shopping';
+            const isLists = tab === 'lists';
+            const isLive = tab === 'live';
             const isAdmin = tab === 'admin';
 
-            document.getElementById('section-planning').classList.toggle('hidden', !isPlanning);
-            document.getElementById('section-shopping').classList.toggle('hidden', !isShopping);
+            document.getElementById('section-lists').classList.toggle('hidden', !isLists);
+            document.getElementById('section-live').classList.toggle('hidden', !isLive);
             document.getElementById('section-admin').classList.toggle('hidden', !isAdmin);
             
-            document.getElementById('tab-planning').className = isPlanning ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
-            document.getElementById('tab-shopping').className = isShopping ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
+            document.getElementById('tab-lists').className = isLists ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
+            document.getElementById('tab-live').className = isLive ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
             document.getElementById('tab-admin').className = isAdmin ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
             
-            if (!isShopping && html5QrCode) {
+            if (!isLive && html5QrCode) {
                 stopScanner();
             }
         }
 
-        // --- PAINEL ADMIN COM FILTROS E CORES DE VENCIMENTO ---
+        // --- MÓDULO MINHAS LISTAS (Até 2 listas por usuário) ---
+        async function loadUserLists() {
+            const { data, error } = await supabaseClient.from('minhas_listas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+            const container = document.getElementById('user-lists-container');
+            const btnNew = document.getElementById('btn-new-list');
+
+            if (error || !data) {
+                container.innerHTML = '<p class="text-sm text-slate-400 col-span-2 text-center">Erro ao carregar listas.</p>';
+                return;
+            }
+
+            if (data.length >= 2) {
+                btnNew.classList.add('opacity-50', 'cursor-not-allowed');
+                btnNew.setAttribute('onclick', "alert('Você atingiu o limite máximo de 2 listas criadas.')");
+            } else {
+                btnNew.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnNew.setAttribute('onclick', 'openCreateListModal()');
+            }
+
+            if (data.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-400 col-span-2 text-center py-8">Nenhuma lista criada. Crie até 2 listas para organizar suas compras.</p>';
+                return;
+            }
+
+            let html = '';
+            for (let lista of data) {
+                // Buscar itens da lista
+                const { data: itens } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', lista.id);
+                const totalItens = itens ? itens.length : 0;
+
+                html += `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">${lista.titulo}</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="editList('${lista.id}', '${lista.titulo}')" class="text-xs text-indigo-600 hover:underline font-medium">Editar</button>
+                                    <button onclick="deleteList('${lista.id}')" class="text-xs text-red-500 hover:underline font-medium">Excluir</button>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">${totalItens} ${totalItens === 1 ? 'item cadastrado' : 'itens cadastrados'}</p>
+                        </div>
+                        <div class="border-t pt-2 max-h-32 overflow-y-auto space-y-1">
+                            ${totalItens === 0 ? '<p class="text-xs text-slate-400 italic">Nenhum item nesta lista.</p>' : itens.map(i => `<div class="text-xs text-slate-700 flex justify-between"><span>• ${i.nome}</span><span class="text-slate-400">${i.ean || ''}</span></div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            loadActiveListSelector();
+        }
+
+        function openCreateListModal(id = '', titulo = '') {
+            document.getElementById('modal-list-id').value = id;
+            document.getElementById('modal-list-name-input').value = titulo;
+            tempModalItems = [];
+            document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
+            document.getElementById('list-modal').classList.remove('hidden');
+            if(id) {
+                document.getElementById('modal-list-title').textContent = 'Editar Lista';
+                loadModalExistingItems(id);
+            } else {
+                document.getElementById('modal-list-title').textContent = 'Nova Lista de Compras';
+            }
+        }
+
+        async function loadModalExistingItems(listaId) {
+            const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', listaId);
+            if(data) {
+                tempModalItems = data.map(i => ({ id: i.id, ean: i.ean, nome: i.nome, salvoNoBanco: true }));
+                renderModalItemsPreview();
+            }
+        }
+
+        function closeListModal() {
+            document.getElementById('list-modal').classList.add('hidden');
+        }
+
+        function addItemToModalListTemp() {
+            const ean = document.getElementById('modal-item-ean').value.trim();
+            const nome = document.getElementById('modal-item-name').value.trim();
+            if(!ean || !nome) return alert('Informe o EAN e o Nome do item.');
+
+            tempModalItems.push({ ean, nome, salvoNoBanco: false });
+            document.getElementById('modal-item-ean').value = '';
+            document.getElementById('modal-item-name').value = '';
+            renderModalItemsPreview();
+        }
+
+        function renderModalItemsPreview() {
+            const preview = document.getElementById('modal-items-preview');
+            if(tempModalItems.length === 0) {
+                preview.innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
+                return;
+            }
+            preview.innerHTML = tempModalItems.map((item, idx) => `
+                <div class="flex justify-between items-center py-1">
+                    <span>${item.nome} (${item.ean})</span>
+                    <button onclick="removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeTempModalItem(idx) {
+            tempModalItems.splice(idx, 1);
+            renderModalItemsPreview();
+        }
+
+        async function saveListWithItems() {
+            const titulo = document.getElementById('modal-list-name-input').value.trim();
+            const listaId = document.getElementById('modal-list-id').value;
+            if(!titulo) return alert('Dê um título para a lista.');
+
+            let currentListId = listaId;
+
+            if(!currentListId) {
+                // Criar nova lista
+                const { data, error } = await supabaseClient.from('minhas_listas').insert([{
+                    user_id: currentUser.id, titulo
+                }]).select().single();
+                if(error) return alert('Erro ao criar lista: ' + error.message);
+                currentListId = data.id;
+            } else {
+                // Atualizar título
+                await supabaseClient.from('minhas_listas').update({ titulo }).eq('id', currentListId);
+            }
+
+            // Inserir novos itens temporários
+            for(let item of tempModalItems) {
+                if(!item.salvoNoBanco) {
+                    await supabaseClient.from('itens_lista').insert([{
+                        lista_id: currentListId, ean: item.ean, nome: item.nome
+                    }]);
+                }
+            }
+
+            closeListModal();
+            loadUserLists();
+        }
+
+        async function editList(id, titulo) {
+            openCreateListModal(id, titulo);
+        }
+
+        async function deleteList(id) {
+            if(!confirm('Deseja realmente excluir esta lista e seus itens?')) return;
+            await supabaseClient.from('minhas_listas').delete().eq('id', id);
+            loadUserLists();
+        }
+
+
+        // --- MÓDULO LIVE MARKET ---
+        async function loadActiveListSelector() {
+            const { data } = await supabaseClient.from('minhas_listas').select('*').eq('user_id', currentUser.id);
+            const select = document.getElementById('select-active-list');
+            if(!data || data.length === 0) {
+                select.innerHTML = '<option value="">Nenhuma lista cadastrada. Crie uma em "Minhas Listas"</option>';
+                return;
+            }
+            select.innerHTML = '<option value="">Selecione uma lista...</option>' + data.map(l => `<option value="${l.id}">${l.titulo}</option>`).join('');
+        }
+
+        async function startLiveMarketSession() {
+            const selectId = document.getElementById('select-active-list').value;
+            if(!selectId) return alert('Selecione uma lista para iniciar o Live Market.');
+
+            activeLiveListId = selectId;
+            const { data: listaInfo } = await supabaseClient.from('minhas_listas').select('titulo').eq('id', selectId).single();
+            document.getElementById('live-session-title-label').textContent = listaInfo.titulo;
+
+            document.getElementById('live-selector-card').classList.add('hidden');
+            document.getElementById('live-active-panel').classList.remove('hidden');
+
+            loadLiveItems();
+        }
+
+        function finishLiveSession() {
+            if(html5QrCode) stopScanner();
+            activeLiveListId = null;
+            document.getElementById('live-active-panel').classList.add('hidden');
+            document.getElementById('live-selector-card').classList.remove('hidden');
+        }
+
+        async function loadLiveItems() {
+            const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', activeLiveListId);
+            currentLiveItems = data || [];
+            renderLiveItemsUI();
+        }
+
+        function renderLiveItemsUI() {
+            const listEl = document.getElementById('live-items-list');
+            let compradosCount = 0;
+            let totalCart = 0;
+            let extrasCount = 0;
+
+            if(currentLiveItems.length === 0) {
+                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item nesta sessão.</p>';
+                document.getElementById('live-progress-count').textContent = '0 / 0 comprados';
+                document.getElementById('live-total-cart').textContent = 'R$ 0,00';
+                document.getElementById('live-total-extras').textContent = '0';
+                return;
+            }
+
+            listEl.innerHTML = currentLiveItems.map(item => {
+                let badgeStyle = 'text-slate-800';
+                let statusText = '';
+                
+                if(item.comprado) {
+                    compradosCount++;
+                    totalCart += (item.preco_pago || 0);
+                    statusStyle = 'line-through text-slate-400';
+                    statusText = `<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">Comprado: R$ ${(item.preco_pago || 0).toFixed(2)}</span>`;
+                } else if(item.cancelado) {
+                    statusStyle = 'line-through text-red-400';
+                    statusText = `<span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-medium">Cancelado</span>`;
+                } else if(item.substituido) {
+                    statusStyle = 'line-through text-amber-500';
+                    statusText = `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">Substituído</span>`;
+                } else if(item.extra) {
+                    extrasCount++;
+                    totalCart += (item.preco_pago || 0);
+                    statusText = `<span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-medium">Extra: R$ ${(item.preco_pago || 0).toFixed(2)}</span>`;
+                } else {
+                    statusText = `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Pendente</span>`;
+                }
+
+                return `
+                    <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm">
+                        <div>
+                            <p class="font-semibold ${statusStyle}">${item.nome}</p>
+                            <p class="text-xs text-slate-400">EAN: ${item.ean || 'N/A'}</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            ${statusText}
+                            <div class="flex gap-1">
+                                ${!item.comprado && !item.cancelado && !item.substituido ? `
+                                    <button onclick="markItemAction('${item.id}', 'comprar')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1 rounded">Comprar</button>
+                                    <button onclick="markItemAction('${item.id}', 'cancelar')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2.5 py-1 rounded">Não quero</button>
+                                    <button onclick="markItemAction('${item.id}', 'substituir')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1 rounded">Substituir</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('live-progress-count').textContent = `${compradosCount} / ${currentLiveItems.length} comprados`;
+            document.getElementById('live-total-cart').textContent = `R$ ${totalCart.toFixed(2)}`;
+            document.getElementById('live-total-extras').textContent = extrasCount;
+        }
+
+        async function registerLiveItem(isExtra = false) {
+            const ean = document.getElementById('live-ean').value.trim();
+            const nome = document.getElementById('live-name').value.trim();
+            const preco = parseFloat(document.getElementById('live-price').value);
+
+            if(!ean || !nome || isNaN(preco)) return alert('Preencha EAN, Nome e Preço do produto.');
+
+            if(isExtra) {
+                // Inserir item extra direto na lista ativa
+                await supabaseClient.from('itens_lista').insert([{
+                    lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true, extra: true
+                }]);
+            } else {
+                // Tentar dar baixa em item existente ou criar como comprado
+                let itemExistente = currentLiveItems.find(i => i.ean === ean && !i.comprado);
+                if(itemExistente) {
+                    await supabaseClient.from('itens_lista').update({ comprado: true, preco_pago: preco }).eq('id', itemExistente.id);
+                } else {
+                    await supabaseClient.from('itens_lista').insert([{
+                        lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true
+                    }]);
+                }
+            }
+
+            document.getElementById('live-ean').value = '';
+            document.getElementById('live-name').value = '';
+            document.getElementById('live-price').value = '';
+            loadLiveItems();
+        }
+
+        async function markItemAction(itemId, acao) {
+            if(acao === 'comprar') {
+                const precoStr = prompt('Informe o preço pago pelo item:');
+                if(!precoStr) return;
+                const preco = parseFloat(precoStr.replace(',', '.'));
+                if(isNaN(preco)) return alert('Preço inválido.');
+
+                await supabaseClient.from('itens_lista').update({ comprado: true, preco_pago: preco }).eq('id', itemId);
+            } else if(acao === 'cancelar') {
+                await supabaseClient.from('itens_lista').update({ cancelado: true }).eq('id', itemId);
+            } else if(acao === 'substituir') {
+                const novoNome = prompt('Nome do item substituto:');
+                const novoEan = prompt('EAN do item substituto (opcional):', '');
+                const novoPrecoStr = prompt('Preço pago pelo substituto:');
+                if(!novoNome || !novoPrecoStr) return;
+                const preco = parseFloat(novoPrecoStr.replace(',', '.'));
+
+                // Marcar atual como substituído
+                await supabaseClient.from('itens_lista').update({ substituido: true }).eq('id', itemId);
+                // Inserir o substituto como comprado
+                await supabaseClient.from('itens_lista').insert([{
+                    lista_id: activeLiveListId, ean: novoEan || '', nome: `(Substituto) ${novoNome}`, preco_pago: preco, comprado: true
+                }]);
+            }
+            loadLiveItems();
+        }
+
+        // --- CÂMERA / LEITOR REFINADO ---
+        function toggleScanner() {
+            const container = document.getElementById('scanner-container');
+            if(!container.classList.contains('hidden')) {
+                stopScanner();
+                return;
+            }
+            container.classList.remove('hidden');
+            
+            html5QrCode = new Html5Qrcode("scanner-container");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { 
+                    fps: 15, 
+                    qrbox: { width: 250, height: 100 },
+                    aspectRatio: 1.777778
+                },
+                (decodedText) => {
+                    document.getElementById('live-ean').value = decodedText;
+                    // Tentar achar nome se já existir nos itens da lista
+                    let match = currentLiveItems.find(i => i.ean === decodedText);
+                    if(match) {
+                        document.getElementById('live-name').value = match.nome;
+                    }
+                    stopScanner();
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                alert('Erro ao iniciar a câmera. Verifique as permissões do navegador: ' + err);
+                container.classList.add('hidden');
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('scanner-container').classList.add('hidden');
+                }).catch(err => console.log(err));
+            }
+        }
+
+        // --- PAINEL ADMIN ---
         async function loadAdminUsers() {
             const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
             if (error || !data) {
@@ -291,10 +701,7 @@
         function renderAdminList() {
             const listEl = document.getElementById('admin-users-list');
             let filtered = allUsersCache;
-
-            if (currentFilter !== 'todos') {
-                filtered = allUsersCache.filter(u => u.status === currentFilter);
-            }
+            if (currentFilter !== 'todos') filtered = allUsersCache.filter(u => u.status === currentFilter);
 
             if (filtered.length === 0) {
                 listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum usuário encontrado com este filtro.</p>';
@@ -316,14 +723,10 @@
                     const partesVal = user.data_validade.split('-');
                     const dataVal = new Date(partesVal[0], partesVal[1] - 1, partesVal[2]);
                     dataVal.setHours(0,0,0,0);
-
                     const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
 
-                    if (diffDias < 0) {
-                        bgCardColor = 'bg-red-50 border-l-4 border-red-500';
-                    } else if (diffDias <= 3) {
-                        bgCardColor = 'bg-amber-50 border-l-4 border-amber-500';
-                    }
+                    if (diffDias < 0) bgCardColor = 'bg-red-50 border-l-4 border-red-500';
+                    else if (diffDias <= 3) bgCardColor = 'bg-amber-50 border-l-4 border-amber-500';
                 }
 
                 return `
@@ -352,150 +755,14 @@
         async function updateUserStatus(userId, novoStatus) {
             const { error } = await supabaseClient.from('perfis').update({ status: novoStatus }).eq('id', userId);
             if (error) alert('Erro ao atualizar: ' + error.message);
-            else {
-                loadAdminUsers();
-            }
+            else loadAdminUsers();
         }
 
         async function updateUserValidity(userId) {
             const novaData = document.getElementById(`val-${userId}`).value;
             const { error } = await supabaseClient.from('perfis').update({ data_validade: novaData || null }).eq('id', userId);
             if (error) alert('Erro ao salvar validade: ' + error.message);
-            else {
-                loadAdminUsers();
-            }
-        }
-
-        // --- MÓDULO DE PLANEJAMENTO ---
-        async function addItemPlanning() {
-            const ean = document.getElementById('plan-ean').value.trim();
-            const nome = document.getElementById('plan-name').value.trim();
-            if (!ean || !nome) return alert('Preencha o EAN e o Nome.');
-
-            const { error } = await supabaseClient.from('lista_planejamento').insert([{
-                user_id: currentUser.id, ean, nome, quantidade: 1
-            }]);
-
-            if (error) alert(error.message);
-            else {
-                document.getElementById('plan-ean').value = '';
-                document.getElementById('plan-name').value = '';
-                loadPlanningList();
-            }
-        }
-
-        async function loadPlanningList() {
-            const { data, error } = await supabaseClient.from('lista_planejamento').select('*').order('criado_em', { ascending: false });
-            const listEl = document.getElementById('planning-list');
-            if (error) return;
-
-            if (data.length === 0) {
-                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item no planejamento.</p>';
-                document.getElementById('total-estimado').textContent = 'Total Estimado: R$ 0,00';
-                return;
-            }
-
-            let html = '';
-            let totalEstimado = 0;
-
-            for (let item of data) {
-                const { data: prodData } = await supabaseClient.from('produtos').select('preco_medio').eq('user_id', currentUser.id).eq('ean', item.ean).single();
-                const precoSugerido = prodData ? prodData.preco_medio : 0;
-                totalEstimado += precoSugerido * item.quantidade;
-
-                html += `
-                    <div class="p-4 flex justify-between items-center text-sm">
-                        <div>
-                            <p class="font-semibold text-slate-800">${item.nome}</p>
-                            <p class="text-xs text-slate-500">EAN: ${item.ean} | Sugestão: R$ ${precoSugerido.toFixed(2)}</p>
-                        </div>
-                        <button onclick="deletePlanning('${item.id}')" class="text-red-500 hover:text-red-700 text-xs font-medium">Remover</button>
-                    </div>
-                `;
-            }
-            listEl.innerHTML = html;
-            document.getElementById('total-estimado').textContent = `Total Estimado: R$ ${totalEstimado.toFixed(2)}`;
-        }
-
-        async function deletePlanning(id) {
-            await supabaseClient.from('lista_planejamento').delete().eq('id', id);
-            loadPlanningList();
-        }
-
-        // --- MÓDULO DE SUPERMERCADO ---
-        async function registerPurchase() {
-            const ean = document.getElementById('shop-ean').value.trim();
-            const nome = document.getElementById('shop-name').value.trim();
-            const precoPago = parseFloat(document.getElementById('shop-price').value);
-
-            if (!ean || !nome || isNaN(precoPago)) return alert('Preencha todos os campos corretamente.');
-
-            const { error: errCompra } = await supabaseClient.from('lista_compras').insert([{
-                user_id: currentUser.id, ean, nome, preco_pago: precoPago
-            }]);
-
-            if (errCompra) return alert(errCompra.message);
-
-            const { data: prodExistente } = await supabaseClient.from('produtos').select('*').eq('user_id', currentUser.id).eq('ean', ean).single();
-
-            if (prodExistente) {
-                const novoPrecoMedio = (prodExistente.preco_medio + precoPago) / 2;
-                await supabaseClient.from('produtos').update({ preco_medio: novoPrecoMedio, ultima_atualizacao: new Date() }).eq('id', prodExistente.id);
-            } else {
-                await supabaseClient.from('produtos').insert([{
-                    user_id: currentUser.id, ean, nome, preco_medio: precoPago
-                }]);
-            }
-
-            document.getElementById('shop-ean').value = '';
-            document.getElementById('shop-name').value = '';
-            document.getElementById('shop-price').value = '';
-            loadShoppingList();
-        }
-
-        async function loadShoppingList() {
-            const { data, error } = await supabaseClient.from('lista_compras').select('*').order('data_compra', { ascending: false });
-            const listEl = document.getElementById('shopping-list');
-            if (error || data.length === 0) {
-                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item comprado nesta sessão.</p>';
-                return;
-            }
-
-            listEl.innerHTML = data.map(item => `
-                <div class="p-4 flex justify-between items-center text-sm">
-                    <div>
-                        <p class="font-semibold text-slate-800">${item.nome}</p>
-                        <p class="text-xs text-slate-500">EAN: ${item.ean}</p>
-                    </div>
-                    <span class="font-bold text-emerald-600">R$ ${item.preco_pago.toFixed(2)}</span>
-                </div>
-            `).join('');
-        }
-
-        function startScanner() {
-            const container = document.getElementById('scanner-container');
-            container.classList.remove('hidden');
-            
-            html5QrCode = new Html5Qrcode("scanner-container");
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 100 } },
-                async (decodedText) => {
-                    document.getElementById('shop-ean').value = decodedText;
-                    const { data } = await supabaseClient.from('produtos').select('nome').eq('user_id', currentUser.id).eq('ean', decodedText).single();
-                    if (data) document.getElementById('shop-name').value = data.nome;
-                    stopScanner();
-                },
-                (errorMessage) => {}
-            ).catch(err => alert('Erro ao iniciar a câmera: ' + err));
-        }
-
-        function stopScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('scanner-container').classList.add('hidden');
-                }).catch(err => console.log(err));
-            }
+            else loadAdminUsers();
         }
     </script>
 </body>
