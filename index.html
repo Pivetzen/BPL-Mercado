@@ -14,12 +14,12 @@
     <div id="auth-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
             <h1 class="text-2xl font-bold text-center text-slate-900 mb-2">SmartMarket</h1>
-            <p class="text-sm text-slate-500 text-center mb-6">Faça login para acessar suas listas de compras</p>
+            <p class="text-sm text-slate-500 text-center mb-6">Faça login para acessar suas listas</p>
             
             <form id="auth-form" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">E-mail</label>
-                    <input type="email5" id="email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="email" id="email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Senha</label>
@@ -34,17 +34,30 @@
         </div>
     </div>
 
+    <!-- TELA DE CONTA PENDENTE / BLOQUEADA -->
+    <div id="pending-screen" class="hidden fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center space-y-4">
+            <h1 class="text-2xl font-bold text-slate-900" id="status-title">Conta em Período de Avaliação (Trial)</h1>
+            <p class="text-sm text-slate-600" id="status-desc">Seu cadastro foi realizado com sucesso, mas o acesso completo aguarda aprovação do administrador.</p>
+            <button onclick="logout()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg transition">Sair / Trocar Conta</button>
+        </div>
+    </div>
+
     <!-- APLICATIVO PRINCIPAL -->
     <div id="app-screen" class="hidden flex-1 flex flex-col">
         <header class="bg-indigo-600 text-white shadow">
             <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-                <h1 class="font-bold text-lg">SmartMarket</h1>
+                <div>
+                    <h1 class="font-bold text-lg">SmartMarket</h1>
+                    <span id="user-badge" class="text-xs bg-indigo-700 px-2 py-0.5 rounded-full"></span>
+                </div>
                 <button onclick="logout()" class="text-xs bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded transition">Sair</button>
             </div>
             <!-- Abas de Navegação -->
-            <div class="max-w-4xl mx-auto px-4 flex gap-4 border-t border-indigo-500">
-                <button onclick="switchTab('planning')" id="tab-planning" class="py-3 font-medium border-b-2 border-white">Planejamento</button>
-                <button onclick="switchTab('shopping')" id="tab-shopping" class="py-3 font-medium border-b-2 border-transparent text-indigo-200">No Supermercado</button>
+            <div class="max-w-4xl mx-auto px-4 flex gap-4 border-t border-indigo-500 overflow-x-auto">
+                <button onclick="switchTab('planning')" id="tab-planning" class="py-3 font-medium border-b-2 border-white whitespace-nowrap">Planejamento</button>
+                <button onclick="switchTab('shopping')" id="tab-shopping" class="py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap">No Supermercado</button>
+                <button onclick="switchTab('admin')" id="tab-admin" class="hidden py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap">Painel Admin</button>
             </div>
         </header>
 
@@ -77,7 +90,6 @@
                     <div id="scanner-container" class="mt-4 max-w-sm mx-auto hidden"></div>
                 </div>
 
-                <!-- Formulário Manual caso necessário -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                     <h3 class="font-bold text-slate-700 mb-2">Registrar Compra do Item</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
@@ -96,12 +108,22 @@
                 </div>
             </section>
 
+            <!-- SEÇÃO 3: PAINEL ADMIN -->
+            <section id="section-admin" class="hidden space-y-4">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-4 border-b bg-slate-50">
+                        <h3 class="font-bold text-slate-700">Gerenciamento de Usuários</h3>
+                        <p class="text-xs text-slate-500">Aprove ou bloqueie o acesso dos usuários cadastrados.</p>
+                    </div>
+                    <div id="admin-users-list" class="divide-y divide-slate-100"></div>
+                </div>
+            </section>
+
         </main>
     </div>
 
     <!-- SCRIPT DE INTEGRAÇÃO -->
     <script>
-        // CONFIGURAÇÃO DO SUPABASE (Substitua pelas suas chaves)
         const SUPABASE_URL = 'https://xjaawuwtcvdnsodmzbdj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYWF3dXd0Y3ZkbnNvZG16YmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjgyMDIsImV4cCI6MjEwNDcwNDIwMn0.w6WeHDMNEg-pG_1G34psLz3Qh7PcNQUPFYSuCcr_VRA';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -109,17 +131,47 @@
         let currentUser = null;
         let html5QrCode = null;
 
-        // Inicialização de Autenticação
-        supabaseClient.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
             currentUser = session?.user || null;
+            
             if (currentUser) {
                 document.getElementById('auth-screen').classList.add('hidden');
+                
+                // Buscar perfil e status do usuário atual
+                const { data: perfil } = await supabaseClient
+                    .from('perfis')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+
+                const isAdmin = currentUser.email === 'pivetzen@gmail.com';
+
+                if (!perfil || (perfil.status === 'trial' && !isAdmin) || perfil.status === 'bloqueado') {
+                    document.getElementById('app-screen').classList.add('hidden');
+                    document.getElementById('pending-screen').classList.remove('hidden');
+                    
+                    if (perfil?.status === 'bloqueado') {
+                        document.getElementById('status-title').textContent = 'Acesso Bloqueado';
+                        document.getElementById('status-desc').textContent = 'Sua conta foi bloqueada pelo administrador.';
+                    }
+                    return;
+                }
+
+                // Usuário Ativo ou Admin
+                document.getElementById('pending-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
+                
+                document.getElementById('user-badge').textContent = isAdmin ? 'Admin' : 'Ativo';
+                document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);
+
                 loadPlanningList();
                 loadShoppingList();
+                if (isAdmin) loadAdminUsers();
+
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('pending-screen').classList.add('hidden');
             }
         });
 
@@ -135,7 +187,7 @@
                 response = await supabaseClient.auth.signInWithPassword({ email, password });
             } else {
                 response = await supabaseClient.auth.signUp({ email, password });
-                if (!response.error) alert('Cadastro realizado! Verifique seu e-mail se necessário ou faça login.');
+                if (!response.error) alert('Cadastro realizado! Sua conta iniciará em modo Trial aguardando liberação.');
             }
 
             if (response.error) {
@@ -148,17 +200,54 @@
             await supabaseClient.auth.signOut();
         }
 
-        // Navegação de Abas
         function switchTab(tab) {
             const isPlanning = tab === 'planning';
+            const isShopping = tab === 'shopping';
+            const isAdmin = tab === 'admin';
+
             document.getElementById('section-planning').classList.toggle('hidden', !isPlanning);
-            document.getElementById('section-shopping').classList.toggle('hidden', isPlanning);
+            document.getElementById('section-shopping').classList.toggle('hidden', !isShopping);
+            document.getElementById('section-admin').classList.toggle('hidden', !isAdmin);
             
-            document.getElementById('tab-planning').className = isPlanning ? 'py-3 font-medium border-b-2 border-white' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200';
-            document.getElementById('tab-shopping').className = !isPlanning ? 'py-3 font-medium border-b-2 border-white' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200';
+            document.getElementById('tab-planning').className = isPlanning ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
+            document.getElementById('tab-shopping').className = isShopping ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
+            document.getElementById('tab-admin').className = isAdmin ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
             
-            if (!isPlanning && html5QrCode) {
+            if (!isShopping && html5QrCode) {
                 stopScanner();
+            }
+        }
+
+        // --- PAINEL ADMIN ---
+        async function loadAdminUsers() {
+            const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
+            const listEl = document.getElementById('admin-users-list');
+            if (error || !data) {
+                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Erro ao carregar usuários.</p>';
+                return;
+            }
+
+            listEl.innerHTML = data.map(user => `
+                <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm">
+                    <div>
+                        <p class="font-semibold text-slate-800">${user.email}</p>
+                        <p class="text-xs text-slate-500">Status atual: <span class="uppercase font-bold text-indigo-600">${user.status}</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateUserStatus('${user.id}', 'ativo')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded transition">Aprovar / Ativar</button>
+                        <button onclick="updateUserStatus('${user.id}', 'trial')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition">Trial</button>
+                        <button onclick="updateUserStatus('${user.id}', 'bloqueado')" class="bg-red-500 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded transition">Bloquear</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateUserStatus(userId, novoStatus) {
+            const { error } = await supabaseClient.from('perfis').update({ status: novoStatus }).eq('id', userId);
+            if (error) alert('Erro ao atualizar: ' + error.message);
+            else {
+                alert('Status atualizado com sucesso!');
+                loadAdminUsers();
             }
         }
 
@@ -169,10 +258,7 @@
             if (!ean || !nome) return alert('Preencha o EAN e o Nome.');
 
             const { error } = await supabaseClient.from('lista_planejamento').insert([{
-                user_id: currentUser.id,
-                ean,
-                nome,
-                quantidade: 1
+                user_id: currentUser.id, ean, nome, quantidade: 1
             }]);
 
             if (error) alert(error.message);
@@ -198,7 +284,6 @@
             let totalEstimado = 0;
 
             for (let item of data) {
-                // Buscar preço médio histórico do produto
                 const { data: prodData } = await supabaseClient.from('produtos').select('preco_medio').eq('user_id', currentUser.id).eq('ean', item.ean).single();
                 const precoSugerido = prodData ? prodData.preco_medio : 0;
                 totalEstimado += precoSugerido * item.quantidade;
@@ -222,7 +307,7 @@
             loadPlanningList();
         }
 
-        // --- MÓDULO DE SUPERMERCADO & HISTÓRICO ---
+        // --- MÓDULO DE SUPERMERCADO ---
         async function registerPurchase() {
             const ean = document.getElementById('shop-ean').value.trim();
             const nome = document.getElementById('shop-name').value.trim();
@@ -230,29 +315,20 @@
 
             if (!ean || !nome || isNaN(precoPago)) return alert('Preencha todos os campos corretamente.');
 
-            // 1. Salvar no histórico de compras
             const { error: errCompra } = await supabaseClient.from('lista_compras').insert([{
-                user_id: currentUser.id,
-                ean,
-                nome,
-                preco_pago: precoPago
+                user_id: currentUser.id, ean, nome, preco_pago: precoPago
             }]);
 
             if (errCompra) return alert(errCompra.message);
 
-            // 2. Atualizar ou criar na tabela de produtos e preço médio
             const { data: prodExistente } = await supabaseClient.from('produtos').select('*').eq('user_id', currentUser.id).eq('ean', ean).single();
 
             if (prodExistente) {
-                // Simples cálculo de média ponderada/recente
                 const novoPrecoMedio = (prodExistente.preco_medio + precoPago) / 2;
                 await supabaseClient.from('produtos').update({ preco_medio: novoPrecoMedio, ultima_atualizacao: new Date() }).eq('id', prodExistente.id);
             } else {
                 await supabaseClient.from('produtos').insert([{
-                    user_id: currentUser.id,
-                    ean,
-                    nome,
-                    preco_medio: precoPago
+                    user_id: currentUser.id, ean, nome, preco_medio: precoPago
                 }]);
             }
 
@@ -281,7 +357,6 @@
             `).join('');
         }
 
-        // Leitor de Código de Barras (Câmera)
         function startScanner() {
             const container = document.getElementById('scanner-container');
             container.classList.remove('hidden');
@@ -292,19 +367,12 @@
                 { fps: 10, qrbox: { width: 250, height: 100 } },
                 async (decodedText) => {
                     document.getElementById('shop-ean').value = decodedText;
-                    
-                    // Tentar buscar se já existe o nome cadastrado no histórico do usuário
                     const { data } = await supabaseClient.from('produtos').select('nome').eq('user_id', currentUser.id).eq('ean', decodedText).single();
-                    if (data) {
-                        document.getElementById('shop-name').value = data.nome;
-                    }
-
+                    if (data) document.getElementById('shop-name').value = data.nome;
                     stopScanner();
                 },
-                (errorMessage) => { /* Erros de leitura ignorados por frame */ }
-            ).catch(err => {
-                alert('Erro ao iniciar a câmera: ' + err);
-            });
+                (errorMessage) => {}
+            ).catch(err => alert('Erro ao iniciar a câmera: ' + err));
         }
 
         function stopScanner() {
