@@ -34,11 +34,11 @@
         </div>
     </div>
 
-    <!-- TELA DE CONTA PENDENTE / BLOQUEADA -->
+    <!-- TELA DE CONTA BLOQUEADA -->
     <div id="pending-screen" class="hidden fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center space-y-4">
-            <h1 class="text-2xl font-bold text-slate-900" id="status-title">Conta em Período de Avaliação (Trial)</h1>
-            <p class="text-sm text-slate-600" id="status-desc">Seu cadastro foi realizado com sucesso, mas o acesso completo aguarda aprovação do administrador.</p>
+            <h1 class="text-2xl font-bold text-red-600" id="status-title">Acesso Bloqueado</h1>
+            <p class="text-sm text-slate-600" id="status-desc">Sua conta foi bloqueada pelo administrador do sistema.</p>
             <button onclick="logout()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg transition">Sair / Trocar Conta</button>
         </div>
     </div>
@@ -146,22 +146,21 @@
 
                 const isAdmin = currentUser.email === 'pivetzen@gmail.com';
 
-                if (!perfil || (perfil.status === 'trial' && !isAdmin) || perfil.status === 'bloqueado') {
+                // Apenas bloqueados ficam sem acesso. Trial e Ativo entram normalmente.
+                if (perfil && perfil.status === 'bloqueado' && !isAdmin) {
                     document.getElementById('app-screen').classList.add('hidden');
                     document.getElementById('pending-screen').classList.remove('hidden');
-                    
-                    if (perfil?.status === 'bloqueado') {
-                        document.getElementById('status-title').textContent = 'Acesso Bloqueado';
-                        document.getElementById('status-desc').textContent = 'Sua conta foi bloqueada pelo administrador.';
-                    }
                     return;
                 }
 
-                // Usuário Ativo ou Admin
                 document.getElementById('pending-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 
-                document.getElementById('user-badge').textContent = isAdmin ? 'Admin' : 'Ativo';
+                let badgeText = 'Ativo';
+                if (isAdmin) badgeText = 'Admin';
+                else if (perfil?.status === 'trial') badgeText = 'Trial';
+
+                document.getElementById('user-badge').textContent = badgeText;
                 document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);
 
                 loadPlanningList();
@@ -187,7 +186,7 @@
                 response = await supabaseClient.auth.signInWithPassword({ email, password });
             } else {
                 response = await supabaseClient.auth.signUp({ email, password });
-                if (!response.error) alert('Cadastro realizado! Sua conta iniciará em modo Trial aguardando liberação.');
+                if (!response.error) alert('Cadastro realizado! Você já pode utilizar o aplicativo em modo Trial.');
             }
 
             if (response.error) {
