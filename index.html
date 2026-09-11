@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartMarket - Live Market</title>
+    <title>SmartMarket - Minhas Listas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -176,14 +176,19 @@
                 <input type="text" id="modal-list-name-input" placeholder="Ex: Supermercado Mensal" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
             </div>
             
-            <div class="border-t pt-3 space-y-2">
-                <h4 class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item Inicial</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <input type="text" id="modal-item-ean" placeholder="EAN" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                    <input type="text" id="modal-item-name" placeholder="Nome do Produto" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                    <button type="button" onclick="addItemToModalListTemp()" class="bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition">Adicionar Item</button>
+            <div class="border-t pt-3 space-y-2 relative">
+                <h4 class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                    <input type="text" id="modal-item-ean" placeholder="EAN" oninput="searchProductByEan(this.value)" class="sm:col-span-4 px-3 py-2 border rounded-lg text-sm outline-none">
+                    <div class="sm:col-span-5 relative">
+                        <input type="text" id="modal-item-name" placeholder="Nome do Produto" oninput="searchProductByName(this.value)" autocomplete="off" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
+                        <!-- Dropdown de Autocomplete para Nome -->
+                        <div id="product-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto z-50 text-xs divide-y"></div>
+                    </div>
+                    <input type="number" id="modal-item-qtd" placeholder="Qtd" value="1" min="1" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
                 </div>
-                <div id="modal-items-preview" class="divide-y max-h-40 overflow-y-auto border rounded-lg p-2 bg-slate-50 text-xs"></div>
+                <button type="button" onclick="addItemToModalListTemp()" class="w-full bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition mt-1">+ Adicionar Item</button>
+                <div id="modal-items-preview" class="divide-y max-h-40 overflow-y-auto border rounded-lg p-2 bg-slate-50 text-xs mt-2"></div>
             </div>
 
             <div class="flex gap-2 pt-2 border-t">
@@ -301,7 +306,7 @@
 
         function switchTab(tab) {
             const isAdmin = tab === 'admin';
-            if (isAdmin && currentUser.email !== 'pivetzen@gmail.com') return; // Bloqueio de segurança extra
+            if (isAdmin && currentUser.email !== 'pivetzen@gmail.com') return;
 
             const isLists = tab === 'lists';
             const isLive = tab === 'live';
@@ -363,13 +368,52 @@
                             <p class="text-xs text-slate-500 mt-1">${totalItens} ${totalItens === 1 ? 'item cadastrado' : 'itens cadastrados'}</p>
                         </div>
                         <div class="border-t pt-2 max-h-32 overflow-y-auto space-y-1">
-                            ${totalItens === 0 ? '<p class="text-xs text-slate-400 italic">Nenhum item nesta lista.</p>' : itens.map(i => `<div class="text-xs text-slate-700 flex justify-between"><span>• ${i.nome}</span><span class="text-slate-400">${i.ean || ''}</span></div>`).join('')}
+                            ${totalItens === 0 ? '<p class="text-xs text-slate-400 italic">Nenhum item nesta lista.</p>' : itens.map(i => `<div class="text-xs text-slate-700 flex justify-between"><span>• ${i.nome} (Qtd: ${i.quantidade || 1})</span><span class="text-slate-400">${i.ean || ''}</span></div>`).join('')}
                         </div>
                     </div>
                 `;
             }
             container.innerHTML = html;
             loadActiveListSelector();
+        }
+
+        async function searchProductByEan(ean) {
+            if (!ean || ean.length < 3) return;
+            // Busca na tabela de itens já cadastrados pelo usuário ou base global se houver
+            const { data } = await supabaseClient.from('itens_lista').select('nome, ean').eq('ean', ean).limit(1);
+            if (data && data.length > 0) {
+                document.getElementById('modal-item-name').value = data[0].nome;
+            }
+        }
+
+        async function searchProductByName(termo) {
+            const dropdown = document.getElementById('product-suggestions');
+            if (!termo || termo.length < 2) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+
+            // Pesquisa itens salvos anteriormente na base de itens
+            const { data } = await supabaseClient.from('itens_lista').select('nome, ean').ilike('nome', `%${termo}%`).limit(5);
+            
+            if (!data || data.length === 0) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+
+            dropdown.innerHTML = data.map(prod => `
+                <div class="p-2 hover:bg-slate-100 cursor-pointer flex justify-between items-center" onclick="selectProductSuggestion('${prod.ean || ''}', '${prod.nome.replace(/'/g, "\\'")}')">
+                    <span class="font-medium text-slate-700">${prod.nome}</span>
+                    <span class="text-slate-400 text-[10px]">${prod.ean || 'Sem EAN'}</span>
+                </div>
+            `).join('');
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectProductSuggestion(ean, nome) {
+            document.getElementById('modal-item-ean').value = ean;
+            document.getElementById('modal-item-name').value = nome;
+            document.getElementById('product-suggestions').classList.add('hidden');
         }
 
         function openCreateListModal(id = '', titulo = '') {
@@ -389,7 +433,7 @@
         async function loadModalExistingItems(listaId) {
             const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', listaId);
             if(data) {
-                tempModalItems = data.map(i => ({ id: i.id, ean: i.ean, nome: i.nome, salvoNoBanco: true }));
+                tempModalItems = data.map(i => ({ id: i.id, ean: i.ean, nome: i.nome, quantidade: i.quantidade || 1, salvoNoBanco: true }));
                 renderModalItemsPreview();
             }
         }
@@ -401,11 +445,15 @@
         function addItemToModalListTemp() {
             const ean = document.getElementById('modal-item-ean').value.trim();
             const nome = document.getElementById('modal-item-name').value.trim();
+            const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;
+            
             if(!ean || !nome) return alert('Informe o EAN e o Nome do item.');
 
-            tempModalItems.push({ ean, nome, salvoNoBanco: false });
+            tempModalItems.push({ ean, nome, quantidade, salvoNoBanco: false });
             document.getElementById('modal-item-ean').value = '';
             document.getElementById('modal-item-name').value = '';
+            document.getElementById('modal-item-qtd').value = '1';
+            document.getElementById('product-suggestions').classList.add('hidden');
             renderModalItemsPreview();
         }
 
@@ -417,8 +465,8 @@
             }
             preview.innerHTML = tempModalItems.map((item, idx) => `
                 <div class="flex justify-between items-center py-1">
-                    <span>${item.nome} (${item.ean})</span>
-                    <button onclick="removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold">×</button>
+                    <span>${item.nome} (Qtd: ${item.quantidade}) - <span class="text-slate-400">${item.ean}</span></span>
+                    <button onclick="removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold px-2">×</button>
                 </div>
             `).join('');
         }
@@ -448,7 +496,7 @@
             for(let item of tempModalItems) {
                 if(!item.salvoNoBanco) {
                     await supabaseClient.from('itens_lista').insert([{
-                        lista_id: currentListId, ean: item.ean, nome: item.nome
+                        lista_id: currentListId, ean: item.ean, nome: item.nome, quantidade: item.quantidade
                     }]);
                 }
             }
@@ -521,7 +569,7 @@
             }
 
             listEl.innerHTML = currentLiveItems.map(item => {
-                let badgeStyle = 'text-slate-800';
+                let statusStyle = '';
                 let statusText = '';
                 
                 if(item.comprado) {
@@ -545,7 +593,7 @@
                 return `
                     <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm hover:bg-slate-50 transition">
                         <div class="cursor-pointer flex-1" onclick="handleItemClickAction('${item.id}', ${item.comprado || item.cancelado || item.substituido})">
-                            <p class="font-semibold ${statusStyle}">${item.nome}</p>
+                            <p class="font-semibold ${statusStyle}">${item.nome} <span class="text-xs text-slate-500 font-normal">(Qtd: ${item.quantidade || 1})</span></p>
                             <p class="text-xs text-slate-400">EAN: ${item.ean || 'N/A'}</p>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
@@ -569,7 +617,6 @@
 
         async function handleItemClickAction(itemId, jaProcessado) {
             if(jaProcessado) return;
-            // Atalho ao clicar no item: solicita direto a compra
             markItemAction(itemId, 'comprar');
         }
 
@@ -581,7 +628,7 @@
             if(!ean || !nome || isNaN(preco)) return alert('Preencha EAN, Nome e Preço do item extra.');
 
             await supabaseClient.from('itens_lista').insert([{
-                lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true, extra: true
+                lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true, extra: true, quantidade: 1
             }]);
 
             document.getElementById('live-ean').value = '';
@@ -608,18 +655,15 @@
                 const preco = parseFloat(novoPrecoStr.replace(',', '.'));
                 if(isNaN(preco)) return alert('Preço inválido.');
 
-                // Marca o item original como substituído
                 await supabaseClient.from('itens_lista').update({ substituido: true }).eq('id', itemId);
                 
-                // Insere logo abaixo o item substituto já comprado
                 await supabaseClient.from('itens_lista').insert([{
-                    lista_id: activeLiveListId, ean: novoEan || '', nome: `(Subst.) ${novoNome}`, preco_pago: preco, comprado: true, extra: true
+                    lista_id: activeLiveListId, ean: novoEan || '', nome: `(Subst.) ${novoNome}`, preco_pago: preco, comprado: true, extra: true, quantidade: 1
                 }]);
             }
             loadLiveItems();
         }
 
-        // --- CÂMERA ---
         function toggleScanner() {
             const container = document.getElementById('scanner-container');
             if(!container.classList.contains('hidden')) {
@@ -655,7 +699,6 @@
             }
         }
 
-        // --- PAINEL ADMIN ---
         async function loadAdminUsers() {
             const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
             if (error || !data) return;
