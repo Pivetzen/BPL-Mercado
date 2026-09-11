@@ -66,24 +66,21 @@
 
         <main class="max-w-4xl mx-auto w-full p-4 flex-1">
             
-            <!-- SEÇÃO 1: MINHAS LISTAS (PLANEJAMENTO) -->
+            <!-- SEÇÃO 1: MINHAS LISTAS -->
             <section id="section-lists" class="space-y-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
                     <div>
                         <h2 class="font-bold text-slate-700">Criar Nova Lista</h2>
-                        <p class="text-xs text-slate-500">Você pode ter até 2 listas salvas (Limite atingido se ja houver 2).</p>
+                        <p class="text-xs text-slate-500">Você pode ter até 2 listas salvas.</p>
                     </div>
                     <button onclick="openCreateListModal()" id="btn-new-list" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">+ Nova Lista</button>
                 </div>
 
-                <div id="user-lists-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Listas injetadas via JS -->
-                </div>
+                <div id="user-lists-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </section>
 
-            <!-- SEÇÃO 2: LIVE MARKET (NO SUPERMERCADO) -->
+            <!-- SEÇÃO 2: LIVE MARKET -->
             <section id="section-live" class="hidden space-y-4">
-                <!-- Seletor de Lista para a Sessão -->
                 <div id="live-selector-card" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
                     <h3 class="font-bold text-slate-700">Iniciar Compras (Live Market)</h3>
                     <p class="text-xs text-slate-500">Selecione qual das suas listas deseja levar para o supermercado:</p>
@@ -105,10 +102,10 @@
                         <button onclick="finishLiveSession()" class="bg-red-500 hover:bg-red-600 text-xs px-3 py-1.5 rounded font-medium transition">Encerrar / Trocar Lista</button>
                     </div>
 
-                    <!-- Bloco de Bipagem / Entrada do Produto -->
+                    <!-- Bloco de Bipagem / Adição de Extras -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
                         <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-slate-700 text-sm">Leitor / Adicionar Produto</h3>
+                            <h3 class="font-bold text-slate-700 text-sm">Leitor / Adicionar Item Extra</h3>
                             <button onclick="toggleScanner()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded transition font-medium">📷 Ligar/Desligar Câmera</button>
                         </div>
                         
@@ -118,10 +115,7 @@
                             <input type="text" id="live-ean" placeholder="Código EAN" class="px-3 py-2 border rounded-lg text-sm outline-none">
                             <input type="text" id="live-name" placeholder="Nome do Produto" class="px-3 py-2 border rounded-lg text-sm outline-none">
                             <input type="number" step="0.01" id="live-price" placeholder="Preço Pago (R$)" class="px-3 py-2 border rounded-lg text-sm outline-none">
-                            <div class="flex gap-1">
-                                <button onclick="registerLiveItem(false)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2 rounded-lg transition">Dar Baixa / Comprar</button>
-                                <button onclick="registerLiveItem(true)" title="Adicionar como item extra fora da lista" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-2 rounded-lg transition">+ Extra</button>
-                            </div>
+                            <button onclick="registerLiveExtraItem()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium py-2 rounded-lg transition">+ Adicionar Extra</button>
                         </div>
                     </div>
 
@@ -129,13 +123,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                             <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
-                                <h3 class="font-bold text-slate-700 text-sm">Itens da Lista (Live)</h3>
+                                <h3 class="font-bold text-slate-700 text-sm">Itens da Lista (Clique para dar baixa)</h3>
                                 <span id="live-progress-count" class="text-xs font-semibold text-slate-500">0 / 0 comprados</span>
                             </div>
                             <div id="live-items-list" class="divide-y divide-slate-100"></div>
                         </div>
 
-                        <!-- Carrinho / Resumo Financeiro -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 space-y-3 h-fit">
                             <h3 class="font-bold text-slate-700 text-sm border-b pb-2">Resumo da Compra</h3>
                             <div class="flex justify-between text-sm">
@@ -159,7 +152,6 @@
                             <h3 class="font-bold text-slate-700">Gerenciamento de Usuários</h3>
                             <p class="text-xs text-slate-500">Filtre, aprove, defina validades e gerencie o acesso.</p>
                         </div>
-                        <!-- Filtros por Status -->
                         <div class="flex gap-1 bg-slate-200 p-1 rounded-lg text-xs font-medium">
                             <button onclick="filterAdminUsers('todos')" id="filter-todos" class="px-3 py-1.5 rounded-md bg-white shadow-sm text-slate-800 transition">Todos</button>
                             <button onclick="filterAdminUsers('ativo')" id="filter-ativo" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Ativos</button>
@@ -212,7 +204,6 @@
         let allUsersCache = [];
         let currentFilter = 'todos';
         
-        // Estado do Live Market
         let activeLiveListId = null;
         let currentLiveItems = [];
         let tempModalItems = [];
@@ -270,6 +261,7 @@
                     validityBadge.classList.add('hidden');
                 }
 
+                // Ocultar estritamente a aba Painel Admin para não-admins
                 document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);
 
                 loadUserLists();
@@ -308,9 +300,11 @@
         }
 
         function switchTab(tab) {
+            const isAdmin = tab === 'admin';
+            if (isAdmin && currentUser.email !== 'pivetzen@gmail.com') return; // Bloqueio de segurança extra
+
             const isLists = tab === 'lists';
             const isLive = tab === 'live';
-            const isAdmin = tab === 'admin';
 
             document.getElementById('section-lists').classList.toggle('hidden', !isLists);
             document.getElementById('section-live').classList.toggle('hidden', !isLive);
@@ -318,14 +312,16 @@
             
             document.getElementById('tab-lists').className = isLists ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
             document.getElementById('tab-live').className = isLive ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
-            document.getElementById('tab-admin').className = isAdmin ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
+            if(currentUser.email === 'pivetzen@gmail.com') {
+                document.getElementById('tab-admin').className = isAdmin ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
+            }
             
             if (!isLive && html5QrCode) {
                 stopScanner();
             }
         }
 
-        // --- MÓDULO MINHAS LISTAS (Até 2 listas por usuário) ---
+        // --- MÓDULO MINHAS LISTAS ---
         async function loadUserLists() {
             const { data, error } = await supabaseClient.from('minhas_listas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
             const container = document.getElementById('user-lists-container');
@@ -351,7 +347,6 @@
 
             let html = '';
             for (let lista of data) {
-                // Buscar itens da lista
                 const { data: itens } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', lista.id);
                 const totalItens = itens ? itens.length : 0;
 
@@ -441,18 +436,15 @@
             let currentListId = listaId;
 
             if(!currentListId) {
-                // Criar nova lista
                 const { data, error } = await supabaseClient.from('minhas_listas').insert([{
                     user_id: currentUser.id, titulo
                 }]).select().single();
                 if(error) return alert('Erro ao criar lista: ' + error.message);
                 currentListId = data.id;
             } else {
-                // Atualizar título
                 await supabaseClient.from('minhas_listas').update({ titulo }).eq('id', currentListId);
             }
 
-            // Inserir novos itens temporários
             for(let item of tempModalItems) {
                 if(!item.salvoNoBanco) {
                     await supabaseClient.from('itens_lista').insert([{
@@ -521,7 +513,7 @@
             let extrasCount = 0;
 
             if(currentLiveItems.length === 0) {
-                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item nesta sessão.</p>';
+                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item nesta lista.</p>';
                 document.getElementById('live-progress-count').textContent = '0 / 0 comprados';
                 document.getElementById('live-total-cart').textContent = 'R$ 0,00';
                 document.getElementById('live-total-extras').textContent = '0';
@@ -535,7 +527,6 @@
                 if(item.comprado) {
                     compradosCount++;
                     totalCart += (item.preco_pago || 0);
-                    statusStyle = 'line-through text-slate-400';
                     statusText = `<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">Comprado: R$ ${(item.preco_pago || 0).toFixed(2)}</span>`;
                 } else if(item.cancelado) {
                     statusStyle = 'line-through text-red-400';
@@ -548,12 +539,12 @@
                     totalCart += (item.preco_pago || 0);
                     statusText = `<span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-medium">Extra: R$ ${(item.preco_pago || 0).toFixed(2)}</span>`;
                 } else {
-                    statusText = `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Pendente</span>`;
+                    statusText = `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Pendente (Clique para comprar)</span>`;
                 }
 
                 return `
-                    <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm">
-                        <div>
+                    <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm hover:bg-slate-50 transition">
+                        <div class="cursor-pointer flex-1" onclick="handleItemClickAction('${item.id}', ${item.comprado || item.cancelado || item.substituido})">
                             <p class="font-semibold ${statusStyle}">${item.nome}</p>
                             <p class="text-xs text-slate-400">EAN: ${item.ean || 'N/A'}</p>
                         </div>
@@ -562,7 +553,7 @@
                             <div class="flex gap-1">
                                 ${!item.comprado && !item.cancelado && !item.substituido ? `
                                     <button onclick="markItemAction('${item.id}', 'comprar')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1 rounded">Comprar</button>
-                                    <button onclick="markItemAction('${item.id}', 'cancelar')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2.5 py-1 rounded">Não quero</button>
+                                    <button onclick="markItemAction('${item.id}', 'cancelar')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2.5 py-1 rounded">Cancelar</button>
                                     <button onclick="markItemAction('${item.id}', 'substituir')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1 rounded">Substituir</button>
                                 ` : ''}
                             </div>
@@ -576,29 +567,22 @@
             document.getElementById('live-total-extras').textContent = extrasCount;
         }
 
-        async function registerLiveItem(isExtra = false) {
+        async function handleItemClickAction(itemId, jaProcessado) {
+            if(jaProcessado) return;
+            // Atalho ao clicar no item: solicita direto a compra
+            markItemAction(itemId, 'comprar');
+        }
+
+        async function registerLiveExtraItem() {
             const ean = document.getElementById('live-ean').value.trim();
             const nome = document.getElementById('live-name').value.trim();
             const preco = parseFloat(document.getElementById('live-price').value);
 
-            if(!ean || !nome || isNaN(preco)) return alert('Preencha EAN, Nome e Preço do produto.');
+            if(!ean || !nome || isNaN(preco)) return alert('Preencha EAN, Nome e Preço do item extra.');
 
-            if(isExtra) {
-                // Inserir item extra direto na lista ativa
-                await supabaseClient.from('itens_lista').insert([{
-                    lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true, extra: true
-                }]);
-            } else {
-                // Tentar dar baixa em item existente ou criar como comprado
-                let itemExistente = currentLiveItems.find(i => i.ean === ean && !i.comprado);
-                if(itemExistente) {
-                    await supabaseClient.from('itens_lista').update({ comprado: true, preco_pago: preco }).eq('id', itemExistente.id);
-                } else {
-                    await supabaseClient.from('itens_lista').insert([{
-                        lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true
-                    }]);
-                }
-            }
+            await supabaseClient.from('itens_lista').insert([{
+                lista_id: activeLiveListId, ean, nome, preco_pago: preco, comprado: true, extra: true
+            }]);
 
             document.getElementById('live-ean').value = '';
             document.getElementById('live-name').value = '';
@@ -617,23 +601,25 @@
             } else if(acao === 'cancelar') {
                 await supabaseClient.from('itens_lista').update({ cancelado: true }).eq('id', itemId);
             } else if(acao === 'substituir') {
-                const novoNome = prompt('Nome do item substituto:');
-                const novoEan = prompt('EAN do item substituto (opcional):', '');
+                const novoNome = prompt('Nome do item substituto (ex: Cheetos):');
+                const novoEan = prompt('EAN do item substituto:', '');
                 const novoPrecoStr = prompt('Preço pago pelo substituto:');
                 if(!novoNome || !novoPrecoStr) return;
                 const preco = parseFloat(novoPrecoStr.replace(',', '.'));
+                if(isNaN(preco)) return alert('Preço inválido.');
 
-                // Marcar atual como substituído
+                // Marca o item original como substituído
                 await supabaseClient.from('itens_lista').update({ substituido: true }).eq('id', itemId);
-                // Inserir o substituto como comprado
+                
+                // Insere logo abaixo o item substituto já comprado
                 await supabaseClient.from('itens_lista').insert([{
-                    lista_id: activeLiveListId, ean: novoEan || '', nome: `(Substituto) ${novoNome}`, preco_pago: preco, comprado: true
+                    lista_id: activeLiveListId, ean: novoEan || '', nome: `(Subst.) ${novoNome}`, preco_pago: preco, comprado: true, extra: true
                 }]);
             }
             loadLiveItems();
         }
 
-        // --- CÂMERA / LEITOR REFINADO ---
+        // --- CÂMERA ---
         function toggleScanner() {
             const container = document.getElementById('scanner-container');
             if(!container.classList.contains('hidden')) {
@@ -645,14 +631,9 @@
             html5QrCode = new Html5Qrcode("scanner-container");
             html5QrCode.start(
                 { facingMode: "environment" },
-                { 
-                    fps: 15, 
-                    qrbox: { width: 250, height: 100 },
-                    aspectRatio: 1.777778
-                },
+                { fps: 15, qrbox: { width: 250, height: 100 }, aspectRatio: 1.777778 },
                 (decodedText) => {
                     document.getElementById('live-ean').value = decodedText;
-                    // Tentar achar nome se já existir nos itens da lista
                     let match = currentLiveItems.find(i => i.ean === decodedText);
                     if(match) {
                         document.getElementById('live-name').value = match.nome;
@@ -661,7 +642,7 @@
                 },
                 (errorMessage) => {}
             ).catch(err => {
-                alert('Erro ao iniciar a câmera. Verifique as permissões do navegador: ' + err);
+                alert('Erro ao iniciar a câmera: ' + err);
                 container.classList.add('hidden');
             });
         }
@@ -677,10 +658,7 @@
         // --- PAINEL ADMIN ---
         async function loadAdminUsers() {
             const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
-            if (error || !data) {
-                document.getElementById('admin-users-list').innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Erro ao carregar usuários.</p>';
-                return;
-            }
+            if (error || !data) return;
             allUsersCache = data;
             renderAdminList();
         }
@@ -718,19 +696,8 @@
                     dataCriacaoFmt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
                 }
 
-                let bgCardColor = 'bg-white';
-                if (user.data_validade) {
-                    const partesVal = user.data_validade.split('-');
-                    const dataVal = new Date(partesVal[0], partesVal[1] - 1, partesVal[2]);
-                    dataVal.setHours(0,0,0,0);
-                    const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
-
-                    if (diffDias < 0) bgCardColor = 'bg-red-50 border-l-4 border-red-500';
-                    else if (diffDias <= 3) bgCardColor = 'bg-amber-50 border-l-4 border-amber-500';
-                }
-
                 return `
-                    <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm ${bgCardColor} transition">
+                    <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm bg-white transition">
                         <div>
                             <p class="font-semibold text-slate-800">${user.email}</p>
                             <p class="text-xs text-slate-500">Cadastrado em: <span class="font-medium text-slate-700">${dataCriacaoFmt}</span></p>
