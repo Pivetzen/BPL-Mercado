@@ -49,7 +49,10 @@
             <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div>
                     <h1 class="font-bold text-lg">SmartMarket</h1>
-                    <span id="user-badge" class="text-xs bg-indigo-700 px-2 py-0.5 rounded-full"></span>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span id="user-badge" class="text-xs bg-indigo-700 px-2 py-0.5 rounded-full font-medium"></span>
+                        <span id="user-validity-badge" class="text-xs bg-indigo-800/80 px-2 py-0.5 rounded-full hidden"></span>
+                    </div>
                 </div>
                 <button onclick="logout()" class="text-xs bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded transition">Sair</button>
             </div>
@@ -157,7 +160,6 @@
                 const isAdmin = currentUser.email === 'pivetzen@gmail.com';
                 const hojeStr = new Date().toISOString().split('T')[0];
 
-                // Verificar se está bloqueado ou com plano vencido (e não for admin)
                 const estaBloqueado = perfil && perfil.status === 'bloqueado';
                 const estaVencido = perfil && perfil.data_validade && perfil.data_validade < hojeStr;
 
@@ -179,6 +181,34 @@
                 else if (perfil?.status === 'trial') badgeText = 'Trial';
 
                 document.getElementById('user-badge').textContent = badgeText;
+
+                // Exibir validade no cabeçalho se houver data definida
+                const validityBadge = document.getElementById('user-validity-badge');
+                if (perfil && perfil.data_validade) {
+                    const partesVal = perfil.data_validade.split('-');
+                    const dataVal = new Date(partesVal[0], partesVal[1] - 1, partesVal[2]);
+                    dataVal.setHours(0,0,0,0);
+
+                    const hoje = new Date();
+                    hoje.setHours(0,0,0,0);
+
+                    const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
+                    let textoDias = '';
+                    if (diffDias > 0) {
+                        textoDias = `${diffDias} ${diffDias === 1 ? 'dia restante' : 'dias restantes'}`;
+                    } else if (diffDias === 0) {
+                        textoDias = 'vence hoje';
+                    } else {
+                        textoDias = 'vencido';
+                    }
+
+                    const dataFormatada = dataVal.toLocaleDateString('pt-BR');
+                    validityBadge.textContent = `Validade: ${dataFormatada} (${textoDias})`;
+                    validityBadge.classList.remove('hidden');
+                } else {
+                    validityBadge.classList.add('hidden');
+                }
+
                 document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);
 
                 loadPlanningList();
@@ -275,14 +305,12 @@
             hoje.setHours(0,0,0,0);
 
             listEl.innerHTML = filtered.map(user => {
-                // Formatar Data de Cadastro
                 let dataCriacaoFmt = 'N/D';
                 if (user.criado_em) {
                     const d = new Date(user.criado_em);
                     dataCriacaoFmt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
                 }
 
-                // Cálculo de cores para o card com base na data de validade
                 let bgCardColor = 'bg-white';
                 if (user.data_validade) {
                     const partesVal = user.data_validade.split('-');
@@ -292,9 +320,9 @@
                     const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
 
                     if (diffDias < 0) {
-                        bgCardColor = 'bg-red-50 border-l-4 border-red-500'; // Vencido
+                        bgCardColor = 'bg-red-50 border-l-4 border-red-500';
                     } else if (diffDias <= 3) {
-                        bgCardColor = 'bg-amber-50 border-l-4 border-amber-500'; // Próximo de vencer (3 dias ou menos)
+                        bgCardColor = 'bg-amber-50 border-l-4 border-amber-500';
                     }
                 }
 
