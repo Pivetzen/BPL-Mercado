@@ -573,6 +573,7 @@
 
             let currentListId = listaId;
 
+            // 1. Cria ou atualiza a lista principal
             if(!currentListId) {
                 const { data, error } = await supabaseClient.from('minhas_listas').insert([{
                     user_id: currentUser.id, titulo
@@ -583,20 +584,26 @@
                 await supabaseClient.from('minhas_listas').update({ titulo }).eq('id', currentListId);
             }
 
+            // 2. Remove itens deletados no modal se houverem
             if(deletedModalItemIds.length > 0) {
                 await supabaseClient.from('itens_lista').delete().in('id', deletedModalItemIds);
             }
 
+            // 3. Salva explicitamente todos os itens novos ou pendentes
             for(let item of tempModalItems) {
                 if(!item.salvoNoBanco) {
-                    await supabaseClient.from('itens_lista').insert([{
+                    const { error: insertError } = await supabaseClient.from('itens_lista').insert([{
                         lista_id: currentListId, 
                         ean: item.ean || '', 
                         nome: item.nome, 
                         marca: item.marca || '', 
                         imagem_url: item.imagem_url || '', 
-                        quantidade: item.quantidade
+                        quantidade: parseInt(item.quantidade) || 1
                     }]);
+
+                    if (insertError) {
+                        console.error('Erro ao inserir item:', insertError.message);
+                    }
                 }
             }
 
