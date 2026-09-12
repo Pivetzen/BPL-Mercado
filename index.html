@@ -6,7 +6,6 @@
     <title>SmartMarket - Minhas Listas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
@@ -102,14 +101,9 @@
                         <button onclick="finishLiveSession()" class="bg-red-500 hover:bg-red-600 text-xs px-3 py-1.5 rounded font-medium transition">Encerrar / Trocar Lista</button>
                     </div>
 
-                    <!-- Bloco de Bipagem / Adição de Extras -->
+                    <!-- Bloco de Adição de Extras -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-slate-700 text-sm">Leitor / Adicionar Item Extra</h3>
-                            <button onclick="toggleScanner()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded transition font-medium">📷 Ligar/Desligar Câmera</button>
-                        </div>
-                        
-                        <div id="scanner-container" class="max-w-xs mx-auto hidden rounded-lg overflow-hidden border"></div>
+                        <h3 class="font-bold text-slate-700 text-sm">Adicionar Item Extra[cite: 2]</h3>
 
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2">
                             <input type="text" id="live-ean" placeholder="Código EAN" class="px-3 py-2 border rounded-lg text-sm outline-none">
@@ -123,21 +117,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                             <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
-                                <h3 class="font-bold text-slate-700 text-sm">Itens da Lista (Clique para dar baixa)</h3>
-                                <span id="live-progress-count" class="text-xs font-semibold text-slate-500">0 / 0 comprados</span>
+                                <h3 class="font-bold text-slate-700 text-sm">Itens da Lista (Clique para dar baixa)[cite: 2]</h3>
+                                <span id="live-progress-count" class="text-xs font-semibold text-slate-500">0 / 0 comprados[cite: 2]</span>
                             </div>
                             <div id="live-items-list" class="divide-y divide-slate-100"></div>
                         </div>
 
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 space-y-3 h-fit">
-                            <h3 class="font-bold text-slate-700 text-sm border-b pb-2">Resumo da Compra</h3>
+                            <h3 class="font-bold text-slate-700 text-sm border-b pb-2">Resumo da Compra[cite: 2]</h3>
                             <div class="flex justify-between text-sm">
-                                <span class="text-slate-500">Total Carrinho:</span>
-                                <span id="live-total-cart" class="font-bold text-emerald-600 text-base">R$ 0,00</span>
+                                <span class="text-slate-500">Total Carrinho:[cite: 2]</span>
+                                <span id="live-total-cart" class="font-bold text-emerald-600 text-base">R$ 0,00[cite: 2]</span>
                             </div>
                             <div class="flex justify-between text-xs text-slate-500">
-                                <span>Itens Extras:</span>
-                                <span id="live-total-extras">0</span>
+                                <span>Itens Extras:[cite: 2]</span>
+                                <span id="live-total-extras">0[cite: 2]</span>
                             </div>
                         </div>
                     </div>
@@ -149,14 +143,14 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-4 border-b bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                            <h3 class="font-bold text-slate-700">Gerenciamento de Usuários</h3>
-                            <p class="text-xs text-slate-500">Filtre, aprove, defina validades e gerencie o acesso.</p>
+                            <h3 class="font-bold text-slate-700">Gerenciamento de Usuários[cite: 2]</h3>
+                            <p class="text-xs text-slate-500">Filtre, aprove, defina validades e gerencie o acesso.[cite: 2]</p>
                         </div>
                         <div class="flex gap-1 bg-slate-200 p-1 rounded-lg text-xs font-medium">
-                            <button onclick="filterAdminUsers('todos')" id="filter-todos" class="px-3 py-1.5 rounded-md bg-white shadow-sm text-slate-800 transition">Todos</button>
-                            <button onclick="filterAdminUsers('ativo')" id="filter-ativo" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Ativos</button>
-                            <button onclick="filterAdminUsers('trial')" id="filter-trial" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Trial</button>
-                            <button onclick="filterAdminUsers('bloqueado')" id="filter-bloqueado" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Bloqueados</button>
+                            <button onclick="filterAdminUsers('todos')" id="filter-todos" class="px-3 py-1.5 rounded-md bg-white shadow-sm text-slate-800 transition">Todos[cite: 2]</button>
+                            <button onclick="filterAdminUsers('ativo')" id="filter-ativo" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Ativos[cite: 2]</button>
+                            <button onclick="filterAdminUsers('trial')" id="filter-trial" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Trial[cite: 2]</button>
+                            <button onclick="filterAdminUsers('bloqueado')" id="filter-bloqueado" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Bloqueados[cite: 2]</button>
                         </div>
                     </div>
                     <div id="admin-users-list" class="divide-y divide-slate-100"></div>
@@ -169,21 +163,21 @@
     <!-- MODAL CRIAR/EDITAR LISTA -->
     <div id="list-modal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
-            <h3 id="modal-list-title" class="font-bold text-lg text-slate-800">Nova Lista de Compras</h3>
+            <h3 id="modal-list-title" class="font-bold text-lg text-slate-800">Nova Lista de Compras[cite: 2]</h3>
             <input type="hidden" id="modal-list-id">
             <input type="hidden" id="modal-item-imagem" value="">
             <input type="hidden" id="modal-item-marca" value="">
             <input type="hidden" id="editing-item-index" value="-1">
             
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Título da Lista</label>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Título da Lista[cite: 2]</label>
                 <input type="text" id="modal-list-name-input" placeholder="Ex: Supermercado Mensal" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
             </div>
             
             <div class="border-t pt-3 space-y-2 relative">
                 <div class="flex justify-between items-center">
-                    <h4 id="form-item-heading" class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista (Base Obrigatória)</h4>
-                    <button type="button" onclick="toggleManualProductEntry()" id="btn-toggle-manual" class="text-xs text-indigo-600 hover:underline font-medium">Não achei o item</button>
+                    <h4 id="form-item-heading" class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista (Base Obrigatória)[cite: 2]</h4>
+                    <button type="button" onclick="toggleManualProductEntry()" id="btn-toggle-manual" class="text-xs text-indigo-600 hover:underline font-medium">Não achei o item[cite: 2]</button>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
@@ -192,7 +186,7 @@
                     <div class="sm:col-span-6 relative">
                         <div class="flex">
                             <input type="text" id="modal-item-name" placeholder="Digite para buscar na base..." oninput="searchProductByNameOrEan(this.value)" autocomplete="off" class="w-full px-3 py-2 border rounded-l-lg text-sm outline-none bg-slate-50">
-                            <button type="button" onclick="searchProductByNameOrEan(document.getElementById('modal-item-name').value)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 text-xs font-medium rounded-r-lg transition">🔍</button>
+                            <button type="button" onclick="searchProductByNameOrEan(document.getElementById('modal-item-name').value)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 text-xs font-medium rounded-r-lg transition">🔍[cite: 2]</button>
                         </div>
                         <!-- Dropdown de Autocomplete / Resultados -->
                         <div id="product-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border rounded-lg shadow-xl max-h-56 overflow-y-auto z-50 text-xs divide-y"></div>
@@ -201,210 +195,203 @@
                     <input type="number" id="modal-item-qtd" placeholder="Qtd" value="1" min="1" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
                 </div>
                 
-                <p id="selection-status-msg" class="text-[11px] text-amber-600 italic">Selecione um produto cadastrado na base de dados para prosseguir.</p>
+                <p id="selection-status-msg" class="text-[11px] text-amber-600 italic">Selecione um produto cadastrado na base de dados para prosseguir.[cite: 2]</p>
 
                 <div class="flex gap-2 mt-1">
-                    <button type="button" id="btn-submit-item" onclick="addItemToModalListTemp()" class="flex-1 bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition">+ Adicionar Item</button>
-                    <button type="button" id="btn-cancel-edit-item" onclick="resetItemForm()" class="hidden bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-lg hover:bg-slate-300 transition">Cancelar Edição</button>
+                    <button type="button" id="btn-submit-item" onclick="addItemToModalListTemp()" class="flex-1 bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition">+ Adicionar Item[cite: 2]</button>
+                    <button type="button" id="btn-cancel-edit-item" onclick="resetItemForm()" class="hidden bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-lg hover:bg-slate-300 transition">Cancelar Edição[cite: 2]</button>
                 </div>
 
                 <div id="modal-items-preview" class="divide-y max-h-40 overflow-y-auto border rounded-lg p-2 bg-slate-50 text-xs mt-2"></div>
             </div>
 
             <div class="flex gap-2 pt-2 border-t">
-                <button onclick="saveListWithItems()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition">Salvar Lista</button>
-                <button onclick="closeListModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm transition">Cancelar</button>
+                <button onclick="saveListWithItems()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition">Salvar Lista[cite: 2]</button>
+                <button onclick="closeListModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm transition">Cancelar[cite: 2]</button>
             </div>
         </div>
     </div>
 
     <!-- SCRIPT DE INTEGRAÇÃO -->
     <script>
-        const SUPABASE_URL = 'https://xjaawuwtcvdnsodmzbdj.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYWF3dXd0Y3ZkbnNvZG16YmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjgyMDIsImV4cCI6MjEwNDcwNDIwMn0.w6WeHDMNEg-pG_1G34psLz3Qh7PcNQUPFYSuCcr_VRA';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://xjaawuwtcvdnsodmzbdj.supabase.co';[cite: 2]
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYWF3dXd0Y3ZkbnNvZG16YmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjgyMDIsImV4cCI6MjEwNDcwNDIwMn0.w6WeHDMNEg-pG_1G34psLz3Qh7PcNQUPFYSuCcr_VRA';[cite: 2]
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);[cite: 2]
 
-        let currentUser = null;
-        let html5QrCode = null;
-        let allUsersCache = [];
-        let currentFilter = 'todos';
+        let currentUser = null;[cite: 2]
+        let allUsersCache = [];[cite: 2]
+        let currentFilter = 'todos';[cite: 2]
         
-        let activeLiveListId = null;
-        let currentLiveItems = [];
-        let tempModalItems = [];
-        let deletedModalItemIds = [];
-        let isProductSelectedFromBase = false;
-        let isManualMode = false;
-        let userPriceHistory = {};
+        let activeLiveListId = null;[cite: 2]
+        let currentLiveItems = [];[cite: 2]
+        let tempModalItems = [];[cite: 2]
+        let deletedModalItemIds = [];[cite: 2]
+        let isProductSelectedFromBase = false;[cite: 2]
+        let isManualMode = false;[cite: 2]
+        let userPriceHistory = {};[cite: 2]
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            currentUser = session?.user || null;
+            currentUser = session?.user || null;[cite: 2]
             
             if (currentUser) {
-                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.add('hidden');[cite: 2]
                 
                 const { data: perfil } = await supabaseClient
                     .from('perfis')
                     .select('*')
                     .eq('id', currentUser.id)
-                    .single();
+                    .single();[cite: 2]
 
-                const isAdmin = currentUser.email === 'pivetzen@gmail.com';
-                const hojeStr = new Date().toISOString().split('T')[0];
+                const isAdmin = currentUser.email === 'pivetzen@gmail.com';[cite: 2]
+                const hojeStr = new Date().toISOString().split('T')[0];[cite: 2]
 
-                const estaBloqueado = perfil && perfil.status === 'bloqueado';
-                const estaVencido = perfil && perfil.data_validade && perfil.data_validade < hojeStr;
+                const estaBloqueado = perfil && perfil.status === 'bloqueado';[cite: 2]
+                const estaVencido = perfil && perfil.data_validade && perfil.data_validade < hojeStr;[cite: 2]
 
                 if ((estaBloqueado || estaVencido) && !isAdmin) {
-                    document.getElementById('app-screen').classList.add('hidden');
-                    document.getElementById('pending-screen').classList.remove('hidden');
+                    document.getElementById('app-screen').classList.add('hidden');[cite: 2]
+                    document.getElementById('pending-screen').classList.remove('hidden');[cite: 2]
                     if (estaVencido) {
-                        document.getElementById('status-title').textContent = 'Plano Expirado';
-                        document.getElementById('status-desc').textContent = 'O período de validade do seu plano expirou. Contate o administrador.';
+                        document.getElementById('status-title').textContent = 'Plano Expirado';[cite: 2]
+                        document.getElementById('status-desc').textContent = 'O período de validade do seu plano expirou. Contate o administrador.';[cite: 2]
                     }
                     return;
                 }
 
-                document.getElementById('pending-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('pending-screen').classList.add('hidden');[cite: 2]
+                document.getElementById('app-screen').classList.remove('hidden');[cite: 2]
                 
-                let badgeText = 'Ativo';
-                if (isAdmin) badgeText = 'Admin';
-                else if (perfil?.status === 'trial') badgeText = 'Trial';
+                let badgeText = 'Ativo';[cite: 2]
+                if (isAdmin) badgeText = 'Admin';[cite: 2]
+                else if (perfil?.status === 'trial') badgeText = 'Trial';[cite: 2]
 
-                document.getElementById('user-badge').textContent = badgeText;
+                document.getElementById('user-badge').textContent = badgeText;[cite: 2]
 
-                const validityBadge = document.getElementById('user-validity-badge');
+                const validityBadge = document.getElementById('user-validity-badge');[cite: 2]
                 if (perfil && perfil.data_validade) {
-                    const partesVal = perfil.data_validade.split('-');
-                    const dataVal = new Date(partesVal[0], partesVal[1] - 1, partesVal[2]);
-                    dataVal.setHours(0,0,0,0);
-                    const hoje = new Date();
-                    hoje.setHours(0,0,0,0);
+                    const partesVal = perfil.data_validade.split('-');[cite: 2]
+                    const dataVal = new Date(partesVal[0], partesVal[1] - 1, partesVal[2]);[cite: 2]
+                    dataVal.setHours(0,0,0,0);[cite: 2]
+                    const hoje = new Date();[cite: 2]
+                    hoje.setHours(0,0,0,0);[cite: 2]
 
-                    const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
-                    let textoDias = diffDias > 0 ? `${diffDias} dias restantes` : (diffDias === 0 ? 'vence hoje' : 'vencido');
-                    validityBadge.textContent = `Validade: ${dataVal.toLocaleDateString('pt-BR')} (${textoDias})`;
-                    validityBadge.classList.remove('hidden');
+                    const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));[cite: 2]
+                    let textoDias = diffDias > 0 ? `${diffDias} dias restantes` : (diffDias === 0 ? 'vence hoje' : 'vencido');[cite: 2]
+                    validityBadge.textContent = `Validade: ${dataVal.toLocaleDateString('pt-BR')} (${textoDias})`;[cite: 2]
+                    validityBadge.classList.remove('hidden');[cite: 2]
                 } else {
-                    validityBadge.classList.add('hidden');
+                    validityBadge.classList.add('hidden');[cite: 2]
                 }
 
-                document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);
+                document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);[cite: 2]
 
-                await loadUserPriceHistory();
-                loadUserLists();
-                loadActiveListSelector();
-                if (isAdmin) loadAdminUsers();
+                await loadUserPriceHistory();[cite: 2]
+                loadUserLists();[cite: 2]
+                loadActiveListSelector();[cite: 2]
+                if (isAdmin) loadAdminUsers();[cite: 2]
 
             } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
-                document.getElementById('pending-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');[cite: 2]
+                document.getElementById('app-screen').classList.add('hidden');[cite: 2]
+                document.getElementById('pending-screen').classList.add('hidden');[cite: 2]
             }
         });
 
         async function loadUserPriceHistory() {
-            if(!currentUser) return;
-            // Busca todas as listas do usuário para cruzar os itens comprados anteriormente
-            const { data: listas } = await supabaseClient.from('minhas_listas').select('id').eq('user_id', currentUser.id);
-            if(!listas || listas.length === 0) return;
-            const listaIds = listas.map(l => l.id);
+            if(!currentUser) return;[cite: 2]
+            const { data: listas } = await supabaseClient.from('minhas_listas').select('id').eq('user_id', currentUser.id);[cite: 2]
+            if(!listas || listas.length === 0) return;[cite: 2]
+            const listaIds = listas.map(l => l.id);[cite: 2]
 
             const { data: itens } = await supabaseClient
                 .from('itens_lista')
                 .select('*')
                 .in('lista_id', listaIds)
                 .eq('comprado', true)
-                .not('preco_pago', 'is', null);
+                .not('preco_pago', 'is', null);[cite: 2]
 
-            userPriceHistory = {};
+            userPriceHistory = {};[cite: 2]
             if(itens) {
-                // Guarda o preço mais recente por EAN ou por Nome
                 itens.forEach(i => {
-                    const preco = i.preco_pago;
-                    if(i.ean) userPriceHistory[i.ean.trim()] = preco;
-                    if(i.nome) userPriceHistory[i.nome.trim().toLowerCase()] = preco;
+                    const preco = i.preco_pago;[cite: 2]
+                    if(i.ean) userPriceHistory[i.ean.trim()] = preco;[cite: 2]
+                    if(i.nome) userPriceHistory[i.nome.trim().toLowerCase()] = preco;[cite: 2]
                 });
             }
         }
 
         async function handleAuth(type) {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorEl = document.getElementById('auth-error');
-            errorEl.classList.add('hidden');
+            const email = document.getElementById('email').value;[cite: 2]
+            const password = document.getElementById('password').value;[cite: 2]
+            const errorEl = document.getElementById('auth-error');[cite: 2]
+            errorEl.classList.add('hidden');[cite: 2]
 
-            let response;
+            let response;[cite: 2]
             if (type === 'login') {
-                response = await supabaseClient.auth.signInWithPassword({ email, password });
+                response = await supabaseClient.auth.signInWithPassword({ email, password });[cite: 2]
             } else {
-                response = await supabaseClient.auth.signUp({ email, password });
-                if (!response.error) alert('Cadastro realizado! Você já pode utilizar o aplicativo em modo Trial.');
+                response = await supabaseClient.auth.signUp({ email, password });[cite: 2]
+                if (!response.error) alert('Cadastro realizado! Você já pode utilizar o aplicativo em modo Trial.');[cite: 2]
             }
 
             if (response.error) {
-                errorEl.textContent = response.error.message;
-                errorEl.classList.remove('hidden');
+                errorEl.textContent = response.error.message;[cite: 2]
+                errorEl.classList.remove('hidden');[cite: 2]
             }
         }
 
         async function logout() {
-            await supabaseClient.auth.signOut();
+            await supabaseClient.auth.signOut();[cite: 2]
         }
 
         function switchTab(tab) {
-            const isAdmin = tab === 'admin';
-            if (isAdmin && currentUser.email !== 'pivetzen@gmail.com') return;
+            const isAdmin = tab === 'admin';[cite: 2]
+            if (isAdmin && currentUser.email !== 'pivetzen@gmail.com') return;[cite: 2]
 
-            const isLists = tab === 'lists';
-            const isLive = tab === 'live';
+            const isLists = tab === 'lists';[cite: 2]
+            const isLive = tab === 'live';[cite: 2]
 
-            document.getElementById('section-lists').classList.toggle('hidden', !isLists);
-            document.getElementById('section-live').classList.toggle('hidden', !isLive);
-            document.getElementById('section-admin').classList.toggle('hidden', !isAdmin);
+            document.getElementById('section-lists').classList.toggle('hidden', !isLists);[cite: 2]
+            document.getElementById('section-live').classList.toggle('hidden', !isLive);[cite: 2]
+            document.getElementById('section-admin').classList.toggle('hidden', !isAdmin);[cite: 2]
             
-            document.getElementById('tab-lists').className = isLists ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
-            document.getElementById('tab-live').className = isLive ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
+            document.getElementById('tab-lists').className = isLists ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';[cite: 2]
+            document.getElementById('tab-live').className = isLive ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';[cite: 2]
             if(currentUser.email === 'pivetzen@gmail.com') {
-                document.getElementById('tab-admin').className = isAdmin ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';
-            }
-            
-            if (!isLive && html5QrCode) {
-                stopScanner();
+                document.getElementById('tab-admin').className = isAdmin ? 'py-3 font-medium border-b-2 border-white whitespace-nowrap' : 'py-3 font-medium border-b-2 border-transparent text-indigo-200 whitespace-nowrap';[cite: 2]
             }
         }
 
         // --- MÓDULO MINHAS LISTAS ---
         async function loadUserLists() {
-            const container = document.getElementById('user-lists-container');
-            const btnNew = document.getElementById('btn-new-list');
-            if (!container) return;
+            const container = document.getElementById('user-lists-container');[cite: 2]
+            const btnNew = document.getElementById('btn-new-list');[cite: 2]
+            if (!container) return;[cite: 2]
 
-            const { data, error } = await supabaseClient.from('minhas_listas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+            const { data, error } = await supabaseClient.from('minhas_listas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });[cite: 2]
 
             if (error || !data) {
-                container.innerHTML = '<p class="text-sm text-slate-400 col-span-2 text-center">Erro ao carregar listas.</p>';
+                container.innerHTML = '<p class="text-sm text-slate-400 col-span-2 text-center">Erro ao carregar listas.</p>';[cite: 2]
                 return;
             }
 
             if (data.length >= 2) {
-                btnNew.classList.add('opacity-50', 'cursor-not-allowed');
-                btnNew.setAttribute('onclick', "alert('Você atingiu o limite máximo de 2 listas criadas.')");
+                btnNew.classList.add('opacity-50', 'cursor-not-allowed');[cite: 2]
+                btnNew.setAttribute('onclick', "alert('Você atingiu o limite máximo de 2 listas criadas.')");[cite: 2]
             } else {
-                btnNew.classList.remove('opacity-50', 'cursor-not-allowed');
-                btnNew.setAttribute('onclick', 'openCreateListModal()');
+                btnNew.classList.remove('opacity-50', 'cursor-not-allowed');[cite: 2]
+                btnNew.setAttribute('onclick', 'openCreateListModal()');[cite: 2]
             }
 
             if (data.length === 0) {
-                container.innerHTML = '<p class="text-sm text-slate-400 col-span-2 text-center py-8">Nenhuma lista criada. Crie até 2 listas para organizar suas compras.</p>';
+                container.innerHTML = '<p class="text-sm text-slate-400 col-span-2 text-center py-8">Nenhuma lista criada. Crie até 2 listas para organizar suas compras.</p>';[cite: 2]
                 return;
             }
 
-            let html = '';
+            let html = '';[cite: 2]
             for (let lista of data) {
-                const { data: itens } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', lista.id);
-                const totalItens = itens ? itens.length : 0;
+                const { data: itens } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', lista.id);[cite: 2]
+                const totalItens = itens ? itens.length : 0;[cite: 2]
 
                 html += `
                     <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex flex-col justify-between space-y-3">
@@ -433,67 +420,67 @@
                             `).join('')}
                         </div>
                     </div>
-                `;
+                `;[cite: 2]
             }
-            container.innerHTML = html;
-            loadActiveListSelector();
+            container.innerHTML = html;[cite: 2]
+            loadActiveListSelector();[cite: 2]
         }
 
         async function searchProductByEan(ean) {
-            if(isManualMode) return;
+            if(isManualMode) return;[cite: 2]
             if (!ean || ean.length < 3) {
-                isProductSelectedFromBase = false;
-                updateSelectionStatus();
+                isProductSelectedFromBase = false;[cite: 2]
+                updateSelectionStatus();[cite: 2]
                 return;
             }
-            const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean.trim()).maybeSingle();
+            const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean.trim()).maybeSingle();[cite: 2]
             
             if (data) {
-                document.getElementById('modal-item-name').value = data.nome;
-                document.getElementById('modal-item-marca').value = data.marca || '';
-                document.getElementById('modal-item-imagem').value = data.imagem_url || '';
-                isProductSelectedFromBase = true;
+                document.getElementById('modal-item-name').value = data.nome;[cite: 2]
+                document.getElementById('modal-item-marca').value = data.marca || '';[cite: 2]
+                document.getElementById('modal-item-imagem').value = data.imagem_url || '';[cite: 2]
+                isProductSelectedFromBase = true;[cite: 2]
             } else {
-                isProductSelectedFromBase = false;
+                isProductSelectedFromBase = false;[cite: 2]
             }
-            updateSelectionStatus();
+            updateSelectionStatus();[cite: 2]
         }
 
         async function searchProductByNameOrEan(termo) {
-            if(isManualMode) return;
-            const dropdown = document.getElementById('product-suggestions');
+            if(isManualMode) return;[cite: 2]
+            const dropdown = document.getElementById('product-suggestions');[cite: 2]
             if (!termo || termo.trim().length < 1) {
-                dropdown.classList.add('hidden');
-                isProductSelectedFromBase = false;
-                updateSelectionStatus();
+                dropdown.classList.add('hidden');[cite: 2]
+                isProductSelectedFromBase = false;[cite: 2]
+                updateSelectionStatus();[cite: 2]
                 return;
             }
 
-            const termoTrim = termo.trim();
+            const termoTrim = termo.trim();[cite: 2]
             
             const { data: dataNome } = await supabaseClient
                 .from('produtos_base')
                 .select('*')
                 .ilike('nome', `%${termoTrim}%`)
-                .limit(10);
+                .limit(10);[cite: 2]
 
             const { data: dataEan } = await supabaseClient
                 .from('produtos_base')
                 .select('*')
                 .ilike('ean', `%${termoTrim}%`)
-                .limit(10);
+                .limit(10);[cite: 2]
 
-            const mapUnico = new Map();
-            if (dataNome) dataNome.forEach(item => mapUnico.set(item.id || item.ean + item.nome, item));
-            if (dataEan) dataEan.forEach(item => mapUnico.set(item.id || item.ean + item.nome, item));
+            const mapUnico = new Map();[cite: 2]
+            if (dataNome) dataNome.forEach(item => mapUnico.set(item.id || item.ean + item.nome, item));[cite: 2]
+            if (dataEan) dataEan.forEach(item => mapUnico.set(item.id || item.ean + item.nome, item));[cite: 2]
             
-            const data = Array.from(mapUnico.values());
+            const data = Array.from(mapUnico.values());[cite: 2]
             
             if (!data || data.length === 0) {
-                dropdown.innerHTML = '<div class="p-3 text-slate-400 text-center">Nenhum produto encontrado. Clique em "Não achei o item" para cadastrar manualmente.</div>';
-                dropdown.classList.remove('hidden');
-                isProductSelectedFromBase = false;
-                updateSelectionStatus();
+                dropdown.innerHTML = '<div class="p-3 text-slate-400 text-center">Nenhum produto encontrado. Clique em "Não achei o item" para cadastrar manualmente.</div>';[cite: 2]
+                dropdown.classList.remove('hidden');[cite: 2]
+                isProductSelectedFromBase = false;[cite: 2]
+                updateSelectionStatus();[cite: 2]
                 return;
             }
 
@@ -508,125 +495,124 @@
                     </div>
                     <span class="text-indigo-600 text-xs font-semibold bg-indigo-50 px-2 py-1 rounded">Selecionar</span>
                 </div>
-            `).join('');
-            dropdown.classList.remove('hidden');
+            `).join('');[cite: 2]
+            dropdown.classList.remove('hidden');[cite: 2]
         }
 
         function selectProductSuggestion(ean, nome, marca, imagem_url) {
-            document.getElementById('modal-item-ean').value = ean;
-            document.getElementById('modal-item-name').value = nome;
-            document.getElementById('modal-item-marca').value = marca;
-            document.getElementById('modal-item-imagem').value = imagem_url;
-            document.getElementById('product-suggestions').classList.add('hidden');
-            isProductSelectedFromBase = true;
-            updateSelectionStatus();
+            document.getElementById('modal-item-ean').value = ean;[cite: 2]
+            document.getElementById('modal-item-name').value = nome;[cite: 2]
+            document.getElementById('modal-item-marca').value = marca;[cite: 2]
+            document.getElementById('modal-item-imagem').value = imagem_url;[cite: 2]
+            document.getElementById('product-suggestions').classList.add('hidden');[cite: 2]
+            isProductSelectedFromBase = true;[cite: 2]
+            updateSelectionStatus();[cite: 2]
         }
 
         function toggleManualProductEntry() {
-            isManualMode = !isManualMode;
-            const btnToggle = document.getElementById('btn-toggle-manual');
-            const nameInput = document.getElementById('modal-item-name');
-            const eanInput = document.getElementById('modal-item-ean');
+            isManualMode = !isManualMode;[cite: 2]
+            const btnToggle = document.getElementById('btn-toggle-manual');[cite: 2]
+            const nameInput = document.getElementById('modal-item-name');[cite: 2]
+            const eanInput = document.getElementById('modal-item-ean');[cite: 2]
 
             if(isManualMode) {
-                btnToggle.textContent = 'Voltar à busca na base';
-                btnToggle.className = 'text-xs text-amber-600 hover:underline font-semibold';
-                isProductSelectedFromBase = true; 
-                nameInput.removeAttribute('readonly');
-                eanInput.removeAttribute('readonly');
-                nameInput.placeholder = 'Nome do produto avulso...';
-                document.getElementById('product-suggestions').classList.add('hidden');
-                document.getElementById('selection-status-msg').textContent = 'Modo de cadastro avulso ativado.';
-                document.getElementById('selection-status-msg').className = 'text-[11px] text-amber-600 font-semibold';
+                btnToggle.textContent = 'Voltar à busca na base';[cite: 2]
+                btnToggle.className = 'text-xs text-amber-600 hover:underline font-semibold';[cite: 2]
+                isProductSelectedFromBase = true;[cite: 2] 
+                nameInput.removeAttribute('readonly');[cite: 2]
+                eanInput.removeAttribute('readonly');[cite: 2]
+                nameInput.placeholder = 'Nome do produto avulso...';[cite: 2]
+                document.getElementById('product-suggestions').classList.add('hidden');[cite: 2]
+                document.getElementById('selection-status-msg').textContent = 'Modo de cadastro avulso ativado.';[cite: 2]
+                document.getElementById('selection-status-msg').className = 'text-[11px] text-amber-600 font-semibold';[cite: 2]
             } else {
-                btnToggle.textContent = 'Não achei o item';
-                btnToggle.className = 'text-xs text-indigo-600 hover:underline font-medium';
-                isProductSelectedFromBase = false;
-                nameInput.value = '';
-                eanInput.value = '';
-                document.getElementById('modal-item-marca').value = '';
-                document.getElementById('modal-item-imagem').value = '';
-                nameInput.placeholder = 'Digite para buscar na base...';
-                updateSelectionStatus();
+                btnToggle.textContent = 'Não achei o item';[cite: 2]
+                btnToggle.className = 'text-xs text-indigo-600 hover:underline font-medium';[cite: 2]
+                isProductSelectedFromBase = false;[cite: 2]
+                nameInput.value = '';[cite: 2]
+                eanInput.value = '';[cite: 2]
+                document.getElementById('modal-item-marca').value = '';[cite: 2]
+                document.getElementById('modal-item-imagem').value = '';[cite: 2]
+                nameInput.placeholder = 'Digite para buscar na base...';[cite: 2]
+                updateSelectionStatus();[cite: 2]
             }
         }
 
         function updateSelectionStatus() {
-            const msgEl = document.getElementById('selection-status-msg');
+            const msgEl = document.getElementById('selection-status-msg');[cite: 2]
             if(isProductSelectedFromBase) {
-                msgEl.textContent = '✔ Produto válido selecionado.';
-                msgEl.className = 'text-[11px] text-emerald-600 font-medium';
+                msgEl.textContent = '✔ Produto válido selecionado.';[cite: 2]
+                msgEl.className = 'text-[11px] text-emerald-600 font-medium';[cite: 2]
             } else {
-                msgEl.textContent = 'Selecione um produto cadastrado na base de dados para prosseguir.';
-                msgEl.className = 'text-[11px] text-amber-600 italic';
+                msgEl.textContent = 'Selecione um produto cadastrado na base de dados para prosseguir.';[cite: 2]
+                msgEl.className = 'text-[11px] text-amber-600 italic';[cite: 2]
             }
         }
 
         function openCreateListModal(id = '', titulo = '') {
-            document.getElementById('modal-list-id').value = id;
-            document.getElementById('modal-list-name-input').value = titulo;
-            tempModalItems = [];
-            deletedModalItemIds = [];
-            resetItemForm();
-            document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
-            document.getElementById('list-modal').classList.remove('hidden');
+            document.getElementById('modal-list-id').value = id;[cite: 2]
+            document.getElementById('modal-list-name-input').value = titulo;[cite: 2]
+            tempModalItems = [];[cite: 2]
+            deletedModalItemIds = [];[cite: 2]
+            resetItemForm();[cite: 2]
+            document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';[cite: 2]
+            document.getElementById('list-modal').classList.remove('hidden');[cite: 2]
             if(id) {
-                document.getElementById('modal-list-title').textContent = 'Editar Lista';
-                loadModalExistingItems(id);
+                document.getElementById('modal-list-title').textContent = 'Editar Lista';[cite: 2]
+                loadModalExistingItems(id);[cite: 2]
             } else {
-                document.getElementById('modal-list-title').textContent = 'Nova Lista de Compras';
+                document.getElementById('modal-list-title').textContent = 'Nova Lista de Compras';[cite: 2]
             }
         }
 
         function resetItemForm() {
-            document.getElementById('editing-item-index').value = '-1';
-            document.getElementById('modal-item-ean').value = '';
-            document.getElementById('modal-item-name').value = '';
-            document.getElementById('modal-item-imagem').value = '';
-            document.getElementById('modal-item-marca').value = '';
-            document.getElementById('modal-item-qtd').value = '1';
-            isManualMode = false;
-            isProductSelectedFromBase = false;
-            document.getElementById('btn-toggle-manual').textContent = 'Não achei o item';
-            document.getElementById('btn-toggle-manual').className = 'text-xs text-indigo-600 hover:underline font-medium';
-            document.getElementById('product-suggestions').classList.add('hidden');
-            updateSelectionStatus();
-            document.getElementById('form-item-heading').textContent = 'Adicionar Item à Lista (Base Obrigatória)';
-            document.getElementById('btn-submit-item').textContent = '+ Adicionar Item';
-            document.getElementById('btn-cancel-edit-item').classList.add('hidden');
+            document.getElementById('editing-item-index').value = '-1';[cite: 2]
+            document.getElementById('modal-item-ean').value = '';[cite: 2]
+            document.getElementById('modal-item-name').value = '';[cite: 2]
+            document.getElementById('modal-item-imagem').value = '';[cite: 2]
+            document.getElementById('modal-item-marca').value = '';[cite: 2]
+            document.getElementById('modal-item-qtd').value = '1';[cite: 2]
+            isManualMode = false;[cite: 2]
+            isProductSelectedFromBase = false;[cite: 2]
+            document.getElementById('btn-toggle-manual').textContent = 'Não achei o item';[cite: 2]
+            document.getElementById('btn-toggle-manual').className = 'text-xs text-indigo-600 hover:underline font-medium';[cite: 2]
+            document.getElementById('product-suggestions').classList.add('hidden');[cite: 2]
+            updateSelectionStatus();[cite: 2]
+            document.getElementById('form-item-heading').textContent = 'Adicionar Item à Lista (Base Obrigatória)';[cite: 2]
+            document.getElementById('btn-submit-item').textContent = '+ Adicionar Item';[cite: 2]
+            document.getElementById('btn-cancel-edit-item').classList.add('hidden');[cite: 2]
         }
 
         async function loadModalExistingItems(listaId) {
-            const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', listaId);
+            const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', listaId);[cite: 2]
             if(data) {
-                tempModalItems = data.map(i => ({ id: i.id, ean: i.ean, nome: i.nome, marca: i.marca, imagem_url: i.imagem_url, quantidade: i.quantidade || 1, salvoNoBanco: true }));
-                renderModalItemsPreview();
+                tempModalItems = data.map(i => ({ id: i.id, ean: i.ean, nome: i.nome, marca: i.marca, imagem_url: i.imagem_url, quantidade: i.quantidade || 1, salvoNoBanco: true }));[cite: 2]
+                renderModalItemsPreview();[cite: 2]
             }
         }
 
         function closeListModal() {
-            document.getElementById('list-modal').classList.add('hidden');
+            document.getElementById('list-modal').classList.add('hidden');[cite: 2]
         }
 
         function addItemToModalListTemp() {
             if(!isProductSelectedFromBase) {
-                return alert('É obrigatório selecionar um item válido da base ou utilizar o botão "Não achei o item" para cadastro avulso.');
+                return alert('É obrigatório selecionar um item válido da base ou utilizar o botão "Não achei o item" para cadastro avulso.');[cite: 2]
             }
 
-            const ean = document.getElementById('modal-item-ean').value.trim();
-            const nome = document.getElementById('modal-item-name').value.trim();
-            const marca = document.getElementById('modal-item-marca').value.trim();
-            const imagem_url = document.getElementById('modal-item-imagem').value.trim();
-            const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;
-            const editingIdx = parseInt(document.getElementById('editing-item-index').value);
+            const ean = document.getElementById('modal-item-ean').value.trim();[cite: 2]
+            const nome = document.getElementById('modal-item-name').value.trim();[cite: 2]
+            const marca = document.getElementById('modal-item-marca').value.trim();[cite: 2]
+            const imagem_url = document.getElementById('modal-item-imagem').value.trim();[cite: 2]
+            const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;[cite: 2]
+            const editingIdx = parseInt(document.getElementById('editing-item-index').value);[cite: 2]
             
             if(!nome) {
-                return alert('Informe o nome do produto.');
+                return alert('Informe o nome do produto.');[cite: 2]
             }
 
             if(editingIdx > -1) {
-                // Editando item existente no array temporário
-                const itemAtual = tempModalItems[editingIdx];
+                const itemAtual = tempModalItems[editingIdx];[cite: 2]
                 tempModalItems[editingIdx] = {
                     ...itemAtual,
                     ean,
@@ -634,40 +620,38 @@
                     marca,
                     imagem_url,
                     quantidade
-                };
+                };[cite: 2]
             } else {
-                // Adicionando novo item
-                tempModalItems.push({ ean, nome, marca, imagem_url, quantidade, salvoNoBanco: false });
+                tempModalItems.push({ ean, nome, marca, imagem_url, quantidade, salvoNoBanco: false });[cite: 2]
             }
             
-            resetItemForm();
-            renderModalItemsPreview();
+            resetItemForm();[cite: 2]
+            renderModalItemsPreview();[cite: 2]
         }
 
         function startEditingItem(idx) {
-            const item = tempModalItems[idx];
-            document.getElementById('editing-item-index').value = idx;
-            document.getElementById('modal-item-ean').value = item.ean || '';
-            document.getElementById('modal-item-name').value = item.nome || '';
-            document.getElementById('modal-item-marca').value = item.marca || '';
-            document.getElementById('modal-item-imagem').value = item.imagem_url || '';
-            document.getElementById('modal-item-qtd').value = item.quantidade || 1;
+            const item = tempModalItems[idx];[cite: 2]
+            document.getElementById('editing-item-index').value = idx;[cite: 2]
+            document.getElementById('modal-item-ean').value = item.ean || '';[cite: 2]
+            document.getElementById('modal-item-name').value = item.nome || '';[cite: 2]
+            document.getElementById('modal-item-marca').value = item.marca || '';[cite: 2]
+            document.getElementById('modal-item-imagem').value = item.imagem_url || '';[cite: 2]
+            document.getElementById('modal-item-qtd').value = item.quantidade || 1;[cite: 2]
             
-            isProductSelectedFromBase = true;
-            updateSelectionStatus();
+            isProductSelectedFromBase = true;[cite: 2]
+            updateSelectionStatus();[cite: 2]
 
-            document.getElementById('form-item-heading').textContent = 'Editar Item Selecionado';
-            document.getElementById('btn-submit-item').textContent = 'Salvar Alteração do Item';
-            document.getElementById('btn-cancel-edit-item').classList.remove('hidden');
+            document.getElementById('form-item-heading').textContent = 'Editar Item Selecionado';[cite: 2]
+            document.getElementById('btn-submit-item').textContent = 'Salvar Alteração do Item';[cite: 2]
+            document.getElementById('btn-cancel-edit-item').classList.remove('hidden');[cite: 2]
             
-            // Rola o scroll do modal para o topo do formulário de itens
-            document.getElementById('modal-item-name').focus();
+            document.getElementById('modal-item-name').focus();[cite: 2]
         }
 
         function renderModalItemsPreview() {
-            const preview = document.getElementById('modal-items-preview');
+            const preview = document.getElementById('modal-items-preview');[cite: 2]
             if(tempModalItems.length === 0) {
-                preview.innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
+                preview.innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';[cite: 2]
                 return;
             }
             preview.innerHTML = tempModalItems.map((item, idx) => `
@@ -681,54 +665,52 @@
                     </div>
                     <button type="button" onclick="event.stopPropagation(); removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">×</button>
                 </div>
-            `).join('');
+            `).join('');[cite: 2]
         }
 
         function removeTempModalItem(idx) {
-            const removed = tempModalItems[idx];
+            const removed = tempModalItems[idx];[cite: 2]
             if (removed && removed.salvoNoBanco && removed.id) {
-                deletedModalItemIds.push(removed.id);
+                deletedModalItemIds.push(removed.id);[cite: 2]
             }
-            tempModalItems.splice(idx, 1);
+            tempModalItems.splice(idx, 1);[cite: 2]
             if(parseInt(document.getElementById('editing-item-index').value) === idx) {
-                resetItemForm();
+                resetItemForm();[cite: 2]
             }
-            renderModalItemsPreview();
+            renderModalItemsPreview();[cite: 2]
         }
 
         async function saveListWithItems() {
-            const titulo = document.getElementById('modal-list-name-input').value.trim();
-            const listaId = document.getElementById('modal-list-id').value;
-            if(!titulo) return alert('Dê um título para a lista.');
+            const titulo = document.getElementById('modal-list-name-input').value.trim();[cite: 2]
+            const listaId = document.getElementById('modal-list-id').value;[cite: 2]
+            if(!titulo) return alert('Dê um título para a lista.');[cite: 2]
 
-            let currentListId = listaId;
+            let currentListId = listaId;[cite: 2]
 
             if(!currentListId) {
                 const { data, error } = await supabaseClient.from('minhas_listas').insert([{
                     user_id: currentUser.id, titulo
-                }]).select().single();
-                if(error) return alert('Erro ao criar lista: ' + error.message);
-                currentListId = data.id;
+                }]).select().single();[cite: 2]
+                if(error) return alert('Erro ao criar lista: ' + error.message);[cite: 2]
+                currentListId = data.id;[cite: 2]
             } else {
-                await supabaseClient.from('minhas_listas').update({ titulo }).eq('id', currentListId);
+                await supabaseClient.from('minhas_listas').update({ titulo }).eq('id', currentListId);[cite: 2]
             }
 
             if(deletedModalItemIds.length > 0) {
-                await supabaseClient.from('itens_lista').delete().in('id', deletedModalItemIds);
+                await supabaseClient.from('itens_lista').delete().in('id', deletedModalItemIds);[cite: 2]
             }
 
             for(let item of tempModalItems) {
                 if(item.salvoNoBanco && item.id) {
-                    // Atualiza o item existente no banco
                     await supabaseClient.from('itens_lista').update({
                         ean: item.ean || '',
                         nome: item.nome,
                         marca: item.marca || '',
                         imagem_url: item.imagem_url || '',
                         quantidade: parseInt(item.quantidade) || 1
-                    }).eq('id', item.id);
+                    }).eq('id', item.id);[cite: 2]
                 } else {
-                    // Insere novo item
                     await supabaseClient.from('itens_lista').insert([{
                         lista_id: currentListId, 
                         ean: item.ean || '', 
@@ -736,126 +718,124 @@
                         marca: item.marca || '', 
                         imagem_url: item.imagem_url || '', 
                         quantidade: parseInt(item.quantidade) || 1
-                    }]);
+                    }]);[cite: 2]
                 }
             }
 
-            closeListModal();
-            loadUserLists();
+            closeListModal();[cite: 2]
+            loadUserLists();[cite: 2]
         }
 
         async function editList(id, titulo) {
-            openCreateListModal(id, titulo);
+            openCreateListModal(id, titulo);[cite: 2]
         }
 
         async function deleteList(id) {
-            if(!confirm('Deseja realmente excluir esta lista e seus itens?')) return;
-            await supabaseClient.from('minhas_listas').delete().eq('id', id);
-            loadUserLists();
+            if(!confirm('Deseja realmente excluir esta lista e seus itens?')) return;[cite: 2]
+            await supabaseClient.from('minhas_listas').delete().eq('id', id);[cite: 2]
+            loadUserLists();[cite: 2]
         }
 
 
         // --- MÓDULO LIVE MARKET ---
         async function loadActiveListSelector() {
-            const { data } = await supabaseClient.from('minhas_listas').select('*').eq('user_id', currentUser.id);
-            const select = document.getElementById('select-active-list');
+            const { data } = await supabaseClient.from('minhas_listas').select('*').eq('user_id', currentUser.id);[cite: 2]
+            const select = document.getElementById('select-active-list');[cite: 2]
             if(!data || data.length === 0) {
-                select.innerHTML = '<option value="">Nenhuma lista cadastrada. Crie uma em "Minhas Listas"</option>';
+                select.innerHTML = '<option value="">Nenhuma lista cadastrada. Crie uma em "Minhas Listas"</option>';[cite: 2]
                 return;
             }
-            select.innerHTML = '<option value="">Selecione uma lista...</option>' + data.map(l => `<option value="${l.id}">${l.titulo}</option>`).join('');
+            select.innerHTML = '<option value="">Selecione uma lista...</option>' + data.map(l => `<option value="${l.id}">${l.titulo}</option>`).join('');[cite: 2]
         }
 
         async function startLiveMarketSession() {
-            const selectId = document.getElementById('select-active-list').value;
-            if(!selectId) return alert('Selecione uma lista para iniciar o Live Market.');
+            const selectId = document.getElementById('select-active-list').value;[cite: 2]
+            if(!selectId) return alert('Selecione uma lista para iniciar o Live Market.');[cite: 2]
 
-            activeLiveListId = selectId;
-            const { data: listaInfo } = await supabaseClient.from('minhas_listas').select('titulo').eq('id', selectId).single();
-            document.getElementById('live-session-title-label').textContent = listaInfo.titulo;
+            activeLiveListId = selectId;[cite: 2]
+            const { data: listaInfo } = await supabaseClient.from('minhas_listas').select('titulo').eq('id', selectId).single();[cite: 2]
+            document.getElementById('live-session-title-label').textContent = listaInfo.titulo;[cite: 2]
 
-            document.getElementById('live-selector-card').classList.add('hidden');
-            document.getElementById('live-active-panel').classList.remove('hidden');
+            document.getElementById('live-selector-card').classList.add('hidden');[cite: 2]
+            document.getElementById('live-active-panel').classList.remove('hidden');[cite: 2]
 
-            await loadUserPriceHistory();
-            loadLiveItems();
+            await loadUserPriceHistory();[cite: 2]
+            loadLiveItems();[cite: 2]
         }
 
         function finishLiveSession() {
-            if(html5QrCode) stopScanner();
-            activeLiveListId = null;
-            document.getElementById('live-active-panel').classList.add('hidden');
-            document.getElementById('live-selector-card').classList.remove('hidden');
+            activeLiveListId = null;[cite: 2]
+            document.getElementById('live-active-panel').classList.add('hidden');[cite: 2]
+            document.getElementById('live-selector-card').classList.remove('hidden');[cite: 2]
         }
 
         async function loadLiveItems() {
-            const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', activeLiveListId);
-            currentLiveItems = data || [];
-            renderLiveItemsUI();
+            const { data } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', activeLiveListId);[cite: 2]
+            currentLiveItems = data || [];[cite: 2]
+            renderLiveItemsUI();[cite: 2]
         }
 
         function renderLiveItemsUI() {
-            const listEl = document.getElementById('live-items-list');
-            let compradosCount = 0;
-            let totalCart = 0;
-            let extrasCount = 0;
+            const listEl = document.getElementById('live-items-list');[cite: 2]
+            let compradosCount = 0;[cite: 2]
+            let totalCart = 0;[cite: 2]
+            let extrasCount = 0;[cite: 2]
 
             if(currentLiveItems.length === 0) {
-                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item nesta lista.</p>';
-                document.getElementById('live-progress-count').textContent = '0 / 0 comprados';
-                document.getElementById('live-total-cart').textContent = 'R$ 0,00';
-                document.getElementById('live-total-extras').textContent = '0';
+                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item nesta lista.</p>';[cite: 2]
+                document.getElementById('live-progress-count').textContent = '0 / 0 comprados';[cite: 2]
+                document.getElementById('live-total-cart').textContent = 'R$ 0,00';[cite: 2]
+                document.getElementById('live-total-extras').textContent = '0';[cite: 2]
                 return;
             }
 
             listEl.innerHTML = currentLiveItems.map(item => {
-                let statusStyle = '';
-                let statusText = '';
-                let historicoPrecoTexto = '';
+                let statusStyle = '';[cite: 2]
+                let statusText = '';[cite: 2]
+                let historicoPrecoTexto = '';[cite: 2]
 
-                // Verifica se há histórico de preço anterior para este item
-                let ultimaCompra = null;
+                let ultimaCompra = null;[cite: 2]
                 if(item.ean && userPriceHistory[item.ean.trim()]) {
-                    ultimaCompra = userPriceHistory[item.ean.trim()];
+                    ultimaCompra = userPriceHistory[item.ean.trim()];[cite: 2]
                 } else if(item.nome && userPriceHistory[item.nome.trim().toLowerCase()]) {
-                    ultimaCompra = userPriceHistory[item.nome.trim().toLowerCase()];
+                    ultimaCompra = userPriceHistory[item.nome.trim().toLowerCase()];[cite: 2]
                 }
 
                 if(ultimaCompra !== null) {
-                    historicoPrecoTexto = `<p class="text-[11px] text-indigo-600 font-medium">Última compra: R$ ${ultimaCompra.toFixed(2)}</p>`;
+                    historicoPrecoTexto = `<p class="text-[11px] text-indigo-600 font-medium">Última compra: R$ ${ultimaCompra.toFixed(2)}</p>`;[cite: 2]
                 }
                 
                 if(item.comprado) {
-                    compradosCount++;
-                    totalCart += (item.preco_pago || 0);
+                    compradosCount++;[cite: 2]
+                    totalCart += (item.preco_pago || 0);[cite: 2]
                     statusText = `
                         <div class="flex items-center gap-2">
                             <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">Comprado: R$ ${(item.preco_pago || 0).toFixed(2)}</span>
                             <button onclick="estornarItem('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2 py-1 rounded font-medium transition" title="Estornar compra">↩ Estornar</button>
                         </div>
-                    `;
+                    `;[cite: 2]
                 } else if(item.cancelado) {
-                    statusStyle = 'line-through text-red-400';
+                    statusStyle = 'line-through text-red-400';[cite: 2]
                     statusText = `
                         <div class="flex items-center gap-2">
                             <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-medium">Cancelado</span>
                             <button onclick="estornarItem('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2 py-1 rounded font-medium transition">↩ Estornar</button>
                         </div>
-                    `;
+                    `;[cite: 2]
                 } else if(item.substituido) {
-                    statusStyle = 'line-through text-amber-500';
-                    statusText = `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">Substituído</span>`;
+                    statusStyle = 'line-through text-amber-500';[cite: 2]
+                    statusText = `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">Substituído</span>`;[cite: 2]
                 } else if(item.extra) {
-                    extrasCount++;
-                    totalCart += (item.preco_pago || 0);
+                    extrasCount++;[cite: 2]
+                    totalCart += (item.preco_pago || 0);[cite: 2]
                     statusText = `
                         <div class="flex items-center gap-2">
                             <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-medium">Extra: R$ ${(item.preco_pago || 0).toFixed(2)}</span>
                             <button onclick="estornarItem('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2 py-1 rounded font-medium transition">↩ Estornar</button>
                         </div>
-                    `;
+                    `;[cite: 2]
                 } else {
-                    statusText = `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Pendente (Clique para comprar)</span>`;
+                    statusText = `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Pendente (Clique para comprar)</span>`;[cite: 2]
                 }
 
                 return `
@@ -879,165 +859,124 @@
                             </div>
                         </div>
                     </div>
-                `;
-            }).join('');
+                `;[cite: 2]
+            }).join('');[cite: 2]
 
-            document.getElementById('live-progress-count').textContent = `${compradosCount} / ${currentLiveItems.length} comprados`;
-            document.getElementById('live-total-cart').textContent = `R$ ${totalCart.toFixed(2)}`;
-            document.getElementById('live-total-extras').textContent = extrasCount;
+            document.getElementById('live-progress-count').textContent = `${compradosCount} / ${currentLiveItems.length} comprados`;[cite: 2]
+            document.getElementById('live-total-cart').textContent = `R$ ${totalCart.toFixed(2)}`;[cite: 2]
+            document.getElementById('live-total-extras').textContent = extrasCount;[cite: 2]
         }
 
         async function handleItemClickAction(itemId, jaProcessado) {
-            if(jaProcessado) return;
-            markItemAction(itemId, 'comprar');
+            if(jaProcessado) return;[cite: 2]
+            markItemAction(itemId, 'comprar');[cite: 2]
         }
 
         async function registerLiveExtraItem() {
-            const ean = document.getElementById('live-ean').value.trim();
-            const nome = document.getElementById('live-name').value.trim();
-            const preco = parseFloat(document.getElementById('live-price').value);
+            const ean = document.getElementById('live-ean').value.trim();[cite: 2]
+            const nome = document.getElementById('live-name').value.trim();[cite: 2]
+            const preco = parseFloat(document.getElementById('live-price').value);[cite: 2]
 
-            if((!ean && !nome) || isNaN(preco)) return alert('Preencha EAN ou Nome e o Preço do item extra.');
+            if((!ean && !nome) || isNaN(preco)) return alert('Preencha EAN ou Nome e o Preço do item extra.');[cite: 2]
 
-            let imagem_url = '';
-            let marca = '';
-            let finalNome = nome;
+            let imagem_url = '';[cite: 2]
+            let marca = '';[cite: 2]
+            let finalNome = nome;[cite: 2]
 
             if(ean) {
-                const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean).maybeSingle();
+                const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean).maybeSingle();[cite: 2]
                 if(data) {
-                    marca = data.marca || '';
-                    imagem_url = data.imagem_url || '';
-                    if(!finalNome) finalNome = data.nome;
+                    marca = data.marca || '';[cite: 2]
+                    imagem_url = data.imagem_url || '';[cite: 2]
+                    if(!finalNome) finalNome = data.nome;[cite: 2]
                 }
             }
 
-            if(!finalNome) finalNome = `Item Extra (${ean})`;
+            if(!finalNome) finalNome = `Item Extra (${ean})`;[cite: 2]
 
             await supabaseClient.from('itens_lista').insert([{
                 lista_id: activeLiveListId, ean, nome: finalNome, marca, imagem_url, preco_pago: preco, comprado: true, extra: true, quantidade: 1
-            }]);
+            }]);[cite: 2]
 
-            document.getElementById('live-ean').value = '';
-            document.getElementById('live-name').value = '';
-            document.getElementById('live-price').value = '';
-            await loadUserPriceHistory();
-            loadLiveItems();
+            document.getElementById('live-ean').value = '';[cite: 2]
+            document.getElementById('live-name').value = '';[cite: 2]
+            document.getElementById('live-price').value = '';[cite: 2]
+            await loadUserPriceHistory();[cite: 2]
+            loadLiveItems();[cite: 2]
         }
 
         async function markItemAction(itemId, acao) {
             if(acao === 'comprar') {
-                const precoStr = prompt('Informe o preço pago pelo item:');
-                if(!precoStr) return;
-                const preco = parseFloat(precoStr.replace(',', '.'));
-                if(isNaN(preco)) return alert('Preço inválido.');
+                const precoStr = prompt('Informe o preço pago pelo item:');[cite: 2]
+                if(!precoStr) return;[cite: 2]
+                const preco = parseFloat(precoStr.replace(',', '.'));[cite: 2]
+                if(isNaN(preco)) return alert('Preço inválido.');[cite: 2]
 
-                await supabaseClient.from('itens_lista').update({ comprado: true, cancelado: false, substituido: false, preco_pago: preco }).eq('id', itemId);
+                await supabaseClient.from('itens_lista').update({ comprado: true, cancelado: false, substituido: false, preco_pago: preco }).eq('id', itemId);[cite: 2]
             } else if(acao === 'cancelar') {
-                await supabaseClient.from('itens_lista').update({ cancelado: true, comprado: false, substituido: false, preco_pago: null }).eq('id', itemId);
+                await supabaseClient.from('itens_lista').update({ cancelado: true, comprado: false, substituido: false, preco_pago: null }).eq('id', itemId);[cite: 2]
             } else if(acao === 'substituir') {
-                const novoNome = prompt('Nome do item substituto (ex: Cheetos):');
-                const novoEan = prompt('EAN do item substituto:', '');
-                const novoPrecoStr = prompt('Preço pago pelo substituto:');
-                if(!novoNome || !novoPrecoStr) return;
-                const preco = parseFloat(novoPrecoStr.replace(',', '.'));
-                if(isNaN(preco)) return alert('Preço inválido.');
+                const novoNome = prompt('Nome do item substituto (ex: Cheetos):');[cite: 2]
+                const novoEan = prompt('EAN do item substituto:', '');[cite: 2]
+                const novoPrecoStr = prompt('Preço pago pelo substituto:');[cite: 2]
+                if(!novoNome || !novoPrecoStr) return;[cite: 2]
+                const preco = parseFloat(novoPrecoStr.replace(',', '.'));[cite: 2]
+                if(isNaN(preco)) return alert('Preço inválido.');[cite: 2]
 
-                await supabaseClient.from('itens_lista').update({ substituido: true }).eq('id', itemId);
+                await supabaseClient.from('itens_lista').update({ substituido: true }).eq('id', itemId);[cite: 2]
                 
                 await supabaseClient.from('itens_lista').insert([{
                     lista_id: activeLiveListId, ean: novoEan || '', nome: `(Subst.) ${novoNome}`, preco_pago: preco, comprado: true, extra: true, quantidade: 1
-                }]);
+                }]);[cite: 2]
             }
-            await loadUserPriceHistory();
-            loadLiveItems();
+            await loadUserPriceHistory();[cite: 2]
+            loadLiveItems();[cite: 2]
         }
 
         async function estornarItem(itemId) {
-            await supabaseClient.from('itens_lista').update({ comprado: false, cancelado: false, substituido: false, preco_pago: null }).eq('id', itemId);
-            await loadUserPriceHistory();
-            loadLiveItems();
-        }
-
-        function toggleScanner() {
-            const container = document.getElementById('scanner-container');
-            if(!container.classList.contains('hidden')) {
-                stopScanner();
-                return;
-            }
-            container.classList.remove('hidden');
-            
-            html5QrCode = new Html5Qrcode("scanner-container");
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 15, qrbox: { width: 250, height: 100 }, aspectRatio: 1.777778 },
-                async (decodedText) => {
-                    document.getElementById('live-ean').value = decodedText;
-                    
-                    const { data } = await supabaseClient.from('produtos_base').select('nome').eq('ean', decodedText).maybeSingle();
-                    if(data) {
-                        document.getElementById('live-name').value = data.nome;
-                    } else {
-                        let match = currentLiveItems.find(i => i.ean === decodedText);
-                        if(match) {
-                            document.getElementById('live-name').value = match.nome;
-                        }
-                    }
-                    stopScanner();
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                alert('Erro ao iniciar a câmera: ' + err);
-                container.classList.add('hidden');
-            });
-        }
-
-        function stopScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('scanner-container').classList.add('hidden');
-                }).catch(err => console.log(err));
-            }
+            await supabaseClient.from('itens_lista').update({ comprado: false, cancelado: false, substituido: false, preco_pago: null }).eq('id', itemId);[cite: 2]
+            await loadUserPriceHistory();[cite: 2]
+            loadLiveItems();[cite: 2]
         }
 
         async function loadAdminUsers() {
-            const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });
-            if (error || !data) return;
-            allUsersCache = data;
-            renderAdminList();
+            const { data, error } = await supabaseClient.from('perfis').select('*').order('criado_em', { ascending: false });[cite: 2]
+            if (error || !data) return;[cite: 2]
+            allUsersCache = data;[cite: 2]
+            renderAdminList();[cite: 2]
         }
 
         function filterAdminUsers(status) {
-            currentFilter = status;
+            currentFilter = status;[cite: 2]
             ['todos', 'ativo', 'trial', 'bloqueado'].forEach(s => {
-                const btn = document.getElementById(`filter-${s}`);
+                const btn = document.getElementById(`filter-${s}`);[cite: 2]
                 if (s === status) {
-                    btn.className = 'px-3 py-1.5 rounded-md bg-white shadow-sm text-slate-800 transition font-semibold';
+                    btn.className = 'px-3 py-1.5 rounded-md bg-white shadow-sm text-slate-800 transition font-semibold';[cite: 2]
                 } else {
-                    btn.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition';
+                    btn.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition';[cite: 2]
                 }
             });
-            renderAdminList();
+            renderAdminList();[cite: 2]
         }
 
         function renderAdminList() {
-            const listEl = document.getElementById('admin-users-list');
-            let filtered = allUsersCache;
-            if (currentFilter !== 'todos') filtered = allUsersCache.filter(u => u.status === currentFilter);
+            const listEl = document.getElementById('admin-users-list');[cite: 2]
+            let filtered = allUsersCache;[cite: 2]
+            if (currentFilter !== 'todos') filtered = allUsersCache.filter(u => u.status === currentFilter);[cite: 2]
 
             if (filtered.length === 0) {
-                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum usuário encontrado com este filtro.</p>';
+                listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum usuário encontrado com este filtro.</p>';[cite: 2]
                 return;
             }
 
-            const hoje = new Date();
-            hoje.setHours(0,0,0,0);
+            const hoje = new Date();[cite: 2]
+            hoje.setHours(0,0,0,0);[cite: 2]
 
             listEl.innerHTML = filtered.map(user => {
-                let dataCriacaoFmt = 'N/D';
+                let dataCriacaoFmt = 'N/D';[cite: 2]
                 if (user.criado_em) {
-                    const d = new Date(user.criado_em);
-                    dataCriacaoFmt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                    const d = new Date(user.criado_em);[cite: 2]
+                    dataCriacaoFmt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});[cite: 2]
                 }
 
                 return `
@@ -1059,21 +998,21 @@
                             </div>
                         </div>
                     </div>
-                `;
-            }).join('');
+                `;[cite: 2]
+            }).join('');[cite: 2]
         }
 
         async function updateUserStatus(userId, novoStatus) {
-            const { error } = await supabaseClient.from('perfis').update({ status: novoStatus }).eq('id', userId);
-            if (error) alert('Erro ao atualizar: ' + error.message);
-            else loadAdminUsers();
+            const { error } = await supabaseClient.from('perfis').update({ status: novoStatus }).eq('id', userId);[cite: 2]
+            if (error) alert('Erro ao atualizar: ' + error.message);[cite: 2]
+            else loadAdminUsers();[cite: 2]
         }
 
         async function updateUserValidity(userId) {
-            const novaData = document.getElementById(`val-${userId}`).value;
-            const { error } = await supabaseClient.from('perfis').update({ data_validade: novaData || null }).eq('id', userId);
-            if (error) alert('Erro ao salvar validade: ' + error.message);
-            else loadAdminUsers();
+            const novaData = document.getElementById(`val-${userId}`).value;[cite: 2]
+            const { error } = await supabaseClient.from('perfis').update({ data_validade: novaData || null }).eq('id', userId);[cite: 2]
+            if (error) alert('Erro ao salvar validade: ' + error.message);[cite: 2]
+            else loadAdminUsers();[cite: 2]
         }
     </script>
 </body>
