@@ -38,7 +38,12 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center space-y-4">
             <h1 class="text-2xl font-bold text-red-600" id="status-title">Acesso Restrito</h1>
             <p class="text-sm text-slate-600" id="status-desc">Sua conta está bloqueada ou o período de acesso expirou.</p>
-            <button onclick="logout()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg transition">Sair / Trocar Conta</button>
+            <div class="space-y-2 pt-2">
+                <a href="https://wa.me/5585987804628?text=Olá,%20gostaria%20de%20regularizar%20meu%20acesso%20ao%20SmartMarket." target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+                    <span>Contatar Administrador (WhatsApp)</span>
+                </a>
+                <button onclick="logout()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 rounded-lg transition">Sair / Trocar Conta</button>
+            </div>
         </div>
     </div>
 
