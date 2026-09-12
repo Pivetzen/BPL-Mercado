@@ -763,10 +763,22 @@
             loadLiveItems();
         }
 
-        function finishLiveSession() {
+        async function finishLiveSession() {
+            if (activeLiveListId) {
+                // Reseta todos os itens da lista ativa para o estado pendente no banco de dados
+                await supabaseClient.from('itens_lista').update({
+                    comprado: false,
+                    cancelado: false,
+                    substituido: false,
+                    preco_pago: null
+                }).eq('lista_id', activeLiveListId);
+            }
+
             activeLiveListId = null;
+            currentLiveItems = [];
             document.getElementById('live-active-panel').classList.add('hidden');
             document.getElementById('live-selector-card').classList.remove('hidden');
+            loadActiveListSelector();
         }
 
         async function loadLiveItems() {
