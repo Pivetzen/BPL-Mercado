@@ -363,7 +363,7 @@
         }
 
         // --- MÓDULO MINHAS LISTAS ---
-        async function loadUserLists() {
+async function loadUserLists() {
             const container = document.getElementById('user-lists-container');
             const btnNew = document.getElementById('btn-new-list');
             if (!container) return;
@@ -390,7 +390,8 @@
 
             let html = '';
             for (let lista of data) {
-                const { data: itens } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', lista.id);
+                // Busca apenas os itens que NÃO são avulsos/extras (.neq('extra', true))
+                const { data: itens } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', lista.id).neq('extra', true);
                 const totalItens = itens ? itens.length : 0;
 
                 html += `
