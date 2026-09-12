@@ -215,7 +215,13 @@
                     <input type="number" id="modal-item-qtd" placeholder="Qtd" value="1" min="1" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
                 </div>
                 
-                <p id="selection-status-msg" class="text-[11px] text-amber-600 italic">Selecione um produto cadastrado na base de dados para prosseguir.</p>
+                <!-- Aviso e Botão de Sugerir Inclusão via WhatsApp -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1">
+                    <p id="selection-status-msg" class="text-[11px] text-amber-600 italic">Selecione um produto cadastrado na base de dados para prosseguir.</p>
+                    <a href="https://wa.me/5585987804628?text=Olá,%20gostaria%20de%20sugerir%20a%20inclusão%20de%20um%20novo%20item%20no%20SmartMarket.%20Seguem%20as%20fotos%20do%20produto%20e%20do%20código%20de%20barras:" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
+                        <span>💬 Sugerir Inclusão de Item</span>
+                    </a>
+                </div>
 
                 <div class="flex gap-2 mt-1">
                     <button type="button" id="btn-submit-item" onclick="addItemToModalListTemp()" class="flex-1 bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition">+ Adicionar Item</button>
