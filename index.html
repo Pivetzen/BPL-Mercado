@@ -907,12 +907,17 @@
 
         async function markItemAction(itemId, acao) {
             if(acao === 'comprar') {
-                const precoStr = prompt('Informe o preço pago pelo item:');
-                if(!precoStr) return;
-                const preco = parseFloat(precoStr.replace(',', '.'));
-                if(isNaN(preco)) return alert('Preço inválido.');
+                const itemAtual = currentLiveItems.find(i => i.id === itemId);
+                const qtd = itemAtual && itemAtual.quantidade ? itemAtual.quantidade : 1;
 
-                await supabaseClient.from('itens_lista').update({ comprado: true, cancelado: false, substituido: false, preco_pago: preco }).eq('id', itemId);
+                const precoStr = prompt(`Informe o preço UNITÁRIO do item (Qtd: ${qtd}):`);
+                if(!precoStr) return;
+                const precoUnitario = parseFloat(precoStr.replace(',', '.'));
+                if(isNaN(precoUnitario)) return alert('Preço inválido.');
+
+                const precoTotalCalculado = precoUnitario * qtd;
+
+                await supabaseClient.from('itens_lista').update({ comprado: true, cancelado: false, substituido: false, preco_pago: precoTotalCalculado }).eq('id', itemId);
             } else if(acao === 'cancelar') {
                 await supabaseClient.from('itens_lista').update({ cancelado: true, comprado: false, substituido: false, preco_pago: null }).eq('id', itemId);
             } else if(acao === 'substituir') {
