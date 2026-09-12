@@ -173,6 +173,8 @@
             <input type="hidden" id="modal-list-id">
             <input type="hidden" id="modal-item-imagem" value="">
             <input type="hidden" id="modal-item-marca" value="">
+            <input type="hidden" id="editing-item-index" value="-1">
+            
             <div>
                 <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Título da Lista</label>
                 <input type="text" id="modal-list-name-input" placeholder="Ex: Supermercado Mensal" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
@@ -180,7 +182,7 @@
             
             <div class="border-t pt-3 space-y-2 relative">
                 <div class="flex justify-between items-center">
-                    <h4 class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista (Base Obrigatória)</h4>
+                    <h4 id="form-item-heading" class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista (Base Obrigatória)</h4>
                     <button type="button" onclick="toggleManualProductEntry()" id="btn-toggle-manual" class="text-xs text-indigo-600 hover:underline font-medium">Não achei o item</button>
                 </div>
 
@@ -201,7 +203,11 @@
                 
                 <p id="selection-status-msg" class="text-[11px] text-amber-600 italic">Selecione um produto cadastrado na base de dados para prosseguir.</p>
 
-                <button type="button" onclick="addItemToModalListTemp()" class="w-full bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition mt-1">+ Adicionar Item</button>
+                <div class="flex gap-2 mt-1">
+                    <button type="button" id="btn-submit-item" onclick="addItemToModalListTemp()" class="flex-1 bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition">+ Adicionar Item</button>
+                    <button type="button" id="btn-cancel-edit-item" onclick="resetItemForm()" class="hidden bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-lg hover:bg-slate-300 transition">Cancelar Edição</button>
+                </div>
+
                 <div id="modal-items-preview" class="divide-y max-h-40 overflow-y-auto border rounded-lg p-2 bg-slate-50 text-xs mt-2"></div>
             </div>
 
@@ -229,6 +235,7 @@
         let deletedModalItemIds = [];
         let isProductSelectedFromBase = false;
         let isManualMode = false;
+        let userPriceHistory = {};
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             currentUser = session?.user || null;
@@ -285,6 +292,7 @@
 
                 document.getElementById('tab-admin').classList.toggle('hidden', !isAdmin);
 
+                await loadUserPriceHistory();
                 loadUserLists();
                 loadActiveListSelector();
                 if (isAdmin) loadAdminUsers();
@@ -295,6 +303,31 @@
                 document.getElementById('pending-screen').classList.add('hidden');
             }
         });
+
+        async function loadUserPriceHistory() {
+            if(!currentUser) return;
+            // Busca todas as listas do usuário para cruzar os itens comprados anteriormente
+            const { data: listas } = await supabaseClient.from('minhas_listas').select('id').eq('user_id', currentUser.id);
+            if(!listas || listas.length === 0) return;
+            const listaIds = listas.map(l => l.id);
+
+            const { data: itens } = await supabaseClient
+                .from('itens_lista')
+                .select('*')
+                .in('lista_id', listaIds)
+                .eq('comprado', true)
+                .not('preco_pago', 'is', null);
+
+            userPriceHistory = {};
+            if(itens) {
+                // Guarda o preço mais recente por EAN ou por Nome
+                itens.forEach(i => {
+                    const preco = i.preco_pago;
+                    if(i.ean) userPriceHistory[i.ean.trim()] = preco;
+                    if(i.nome) userPriceHistory[i.nome.trim().toLowerCase()] = preco;
+                });
+            }
+        }
 
         async function handleAuth(type) {
             const email = document.getElementById('email').value;
@@ -498,7 +531,7 @@
             if(isManualMode) {
                 btnToggle.textContent = 'Voltar à busca na base';
                 btnToggle.className = 'text-xs text-amber-600 hover:underline font-semibold';
-                isProductSelectedFromBase = true; // Libera o cadastro avulso
+                isProductSelectedFromBase = true; 
                 nameInput.removeAttribute('readonly');
                 eanInput.removeAttribute('readonly');
                 nameInput.placeholder = 'Nome do produto avulso...';
@@ -534,16 +567,7 @@
             document.getElementById('modal-list-name-input').value = titulo;
             tempModalItems = [];
             deletedModalItemIds = [];
-            isManualMode = false;
-            isProductSelectedFromBase = false;
-            document.getElementById('btn-toggle-manual').textContent = 'Não achei o item';
-            document.getElementById('btn-toggle-manual').className = 'text-xs text-indigo-600 hover:underline font-medium';
-            document.getElementById('modal-item-ean').value = '';
-            document.getElementById('modal-item-name').value = '';
-            document.getElementById('modal-item-imagem').value = '';
-            document.getElementById('modal-item-marca').value = '';
-            document.getElementById('product-suggestions').classList.add('hidden');
-            updateSelectionStatus();
+            resetItemForm();
             document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
             document.getElementById('list-modal').classList.remove('hidden');
             if(id) {
@@ -552,6 +576,24 @@
             } else {
                 document.getElementById('modal-list-title').textContent = 'Nova Lista de Compras';
             }
+        }
+
+        function resetItemForm() {
+            document.getElementById('editing-item-index').value = '-1';
+            document.getElementById('modal-item-ean').value = '';
+            document.getElementById('modal-item-name').value = '';
+            document.getElementById('modal-item-imagem').value = '';
+            document.getElementById('modal-item-marca').value = '';
+            document.getElementById('modal-item-qtd').value = '1';
+            isManualMode = false;
+            isProductSelectedFromBase = false;
+            document.getElementById('btn-toggle-manual').textContent = 'Não achei o item';
+            document.getElementById('btn-toggle-manual').className = 'text-xs text-indigo-600 hover:underline font-medium';
+            document.getElementById('product-suggestions').classList.add('hidden');
+            updateSelectionStatus();
+            document.getElementById('form-item-heading').textContent = 'Adicionar Item à Lista (Base Obrigatória)';
+            document.getElementById('btn-submit-item').textContent = '+ Adicionar Item';
+            document.getElementById('btn-cancel-edit-item').classList.add('hidden');
         }
 
         async function loadModalExistingItems(listaId) {
@@ -576,29 +618,50 @@
             const marca = document.getElementById('modal-item-marca').value.trim();
             const imagem_url = document.getElementById('modal-item-imagem').value.trim();
             const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;
+            const editingIdx = parseInt(document.getElementById('editing-item-index').value);
             
             if(!nome) {
                 return alert('Informe o nome do produto.');
             }
 
-            tempModalItems.push({ ean, nome, marca, imagem_url, quantidade, salvoNoBanco: false });
-            
-            // Reseta os campos para o próximo item mantendo a regra da base
-            document.getElementById('modal-item-ean').value = '';
-            document.getElementById('modal-item-name').value = '';
-            document.getElementById('modal-item-marca').value = '';
-            document.getElementById('modal-item-imagem').value = '';
-            document.getElementById('modal-item-qtd').value = '1';
-            document.getElementById('product-suggestions').classList.add('hidden');
-            
-            if(isManualMode) {
-                toggleManualProductEntry(); // Reseta o modo manual após adicionar
+            if(editingIdx > -1) {
+                // Editando item existente no array temporário
+                const itemAtual = tempModalItems[editingIdx];
+                tempModalItems[editingIdx] = {
+                    ...itemAtual,
+                    ean,
+                    nome,
+                    marca,
+                    imagem_url,
+                    quantidade
+                };
             } else {
-                isProductSelectedFromBase = false;
-                updateSelectionStatus();
+                // Adicionando novo item
+                tempModalItems.push({ ean, nome, marca, imagem_url, quantidade, salvoNoBanco: false });
             }
-
+            
+            resetItemForm();
             renderModalItemsPreview();
+        }
+
+        function startEditingItem(idx) {
+            const item = tempModalItems[idx];
+            document.getElementById('editing-item-index').value = idx;
+            document.getElementById('modal-item-ean').value = item.ean || '';
+            document.getElementById('modal-item-name').value = item.nome || '';
+            document.getElementById('modal-item-marca').value = item.marca || '';
+            document.getElementById('modal-item-imagem').value = item.imagem_url || '';
+            document.getElementById('modal-item-qtd').value = item.quantidade || 1;
+            
+            isProductSelectedFromBase = true;
+            updateSelectionStatus();
+
+            document.getElementById('form-item-heading').textContent = 'Editar Item Selecionado';
+            document.getElementById('btn-submit-item').textContent = 'Salvar Alteração do Item';
+            document.getElementById('btn-cancel-edit-item').classList.remove('hidden');
+            
+            // Rola o scroll do modal para o topo do formulário de itens
+            document.getElementById('modal-item-name').focus();
         }
 
         function renderModalItemsPreview() {
@@ -608,15 +671,15 @@
                 return;
             }
             preview.innerHTML = tempModalItems.map((item, idx) => `
-                <div class="flex justify-between items-center py-1.5 gap-2">
-                    <div class="flex items-center gap-2">
+                <div class="flex justify-between items-center py-1.5 gap-2 hover:bg-slate-100 px-1 rounded cursor-pointer" onclick="startEditingItem(${idx})">
+                    <div class="flex items-center gap-2 flex-1">
                         ${item.imagem_url ? `<img src="${item.imagem_url}" class="w-7 h-7 object-contain rounded border bg-white">` : `<div class="w-7 h-7 bg-slate-100 rounded border flex items-center justify-center text-[10px]">📦</div>`}
                         <div>
                             <p class="font-medium text-slate-800">${item.nome} <span class="text-slate-500 font-normal">(Qtd: ${item.quantidade})</span></p>
-                            <p class="text-[10px] text-slate-400">EAN: ${item.ean || 'N/A'}</p>
+                            <p class="text-[10px] text-slate-400">EAN: ${item.ean || 'N/A'} • <span class="text-indigo-600 font-medium">Clique para editar</span></p>
                         </div>
                     </div>
-                    <button type="button" onclick="removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold px-2">×</button>
+                    <button type="button" onclick="event.stopPropagation(); removeTempModalItem(${idx})" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">×</button>
                 </div>
             `).join('');
         }
@@ -627,6 +690,9 @@
                 deletedModalItemIds.push(removed.id);
             }
             tempModalItems.splice(idx, 1);
+            if(parseInt(document.getElementById('editing-item-index').value) === idx) {
+                resetItemForm();
+            }
             renderModalItemsPreview();
         }
 
@@ -652,7 +718,17 @@
             }
 
             for(let item of tempModalItems) {
-                if(!item.salvoNoBanco) {
+                if(item.salvoNoBanco && item.id) {
+                    // Atualiza o item existente no banco
+                    await supabaseClient.from('itens_lista').update({
+                        ean: item.ean || '',
+                        nome: item.nome,
+                        marca: item.marca || '',
+                        imagem_url: item.imagem_url || '',
+                        quantidade: parseInt(item.quantidade) || 1
+                    }).eq('id', item.id);
+                } else {
+                    // Insere novo item
                     await supabaseClient.from('itens_lista').insert([{
                         lista_id: currentListId, 
                         ean: item.ean || '', 
@@ -701,6 +777,7 @@
             document.getElementById('live-selector-card').classList.add('hidden');
             document.getElementById('live-active-panel').classList.remove('hidden');
 
+            await loadUserPriceHistory();
             loadLiveItems();
         }
 
@@ -734,21 +811,49 @@
             listEl.innerHTML = currentLiveItems.map(item => {
                 let statusStyle = '';
                 let statusText = '';
+                let historicoPrecoTexto = '';
+
+                // Verifica se há histórico de preço anterior para este item
+                let ultimaCompra = null;
+                if(item.ean && userPriceHistory[item.ean.trim()]) {
+                    ultimaCompra = userPriceHistory[item.ean.trim()];
+                } else if(item.nome && userPriceHistory[item.nome.trim().toLowerCase()]) {
+                    ultimaCompra = userPriceHistory[item.nome.trim().toLowerCase()];
+                }
+
+                if(ultimaCompra !== null) {
+                    historicoPrecoTexto = `<p class="text-[11px] text-indigo-600 font-medium">Última compra: R$ ${ultimaCompra.toFixed(2)}</p>`;
+                }
                 
                 if(item.comprado) {
                     compradosCount++;
                     totalCart += (item.preco_pago || 0);
-                    statusText = `<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">Comprado: R$ ${(item.preco_pago || 0).toFixed(2)}</span>`;
+                    statusText = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">Comprado: R$ ${(item.preco_pago || 0).toFixed(2)}</span>
+                            <button onclick="estornarItem('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2 py-1 rounded font-medium transition" title="Estornar compra">↩ Estornar</button>
+                        </div>
+                    `;
                 } else if(item.cancelado) {
                     statusStyle = 'line-through text-red-400';
-                    statusText = `<span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-medium">Cancelado</span>`;
+                    statusText = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-medium">Cancelado</span>
+                            <button onclick="estornarItem('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2 py-1 rounded font-medium transition">↩ Estornar</button>
+                        </div>
+                    `;
                 } else if(item.substituido) {
                     statusStyle = 'line-through text-amber-500';
                     statusText = `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">Substituído</span>`;
                 } else if(item.extra) {
                     extrasCount++;
                     totalCart += (item.preco_pago || 0);
-                    statusText = `<span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-medium">Extra: R$ ${(item.preco_pago || 0).toFixed(2)}</span>`;
+                    statusText = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-medium">Extra: R$ ${(item.preco_pago || 0).toFixed(2)}</span>
+                            <button onclick="estornarItem('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2 py-1 rounded font-medium transition">↩ Estornar</button>
+                        </div>
+                    `;
                 } else {
                     statusText = `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Pendente (Clique para comprar)</span>`;
                 }
@@ -760,6 +865,7 @@
                             <div>
                                 <p class="font-semibold ${statusStyle}">${item.nome} <span class="text-xs text-slate-500 font-normal">(Qtd: ${item.quantidade || 1})</span></p>
                                 <p class="text-xs text-slate-400">${item.marca ? item.marca + ' • ' : ''}EAN: ${item.ean || 'N/A'}</p>
+                                ${historicoPrecoTexto}
                             </div>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
@@ -815,6 +921,7 @@
             document.getElementById('live-ean').value = '';
             document.getElementById('live-name').value = '';
             document.getElementById('live-price').value = '';
+            await loadUserPriceHistory();
             loadLiveItems();
         }
 
@@ -825,9 +932,9 @@
                 const preco = parseFloat(precoStr.replace(',', '.'));
                 if(isNaN(preco)) return alert('Preço inválido.');
 
-                await supabaseClient.from('itens_lista').update({ comprado: true, preco_pago: preco }).eq('id', itemId);
+                await supabaseClient.from('itens_lista').update({ comprado: true, cancelado: false, substituido: false, preco_pago: preco }).eq('id', itemId);
             } else if(acao === 'cancelar') {
-                await supabaseClient.from('itens_lista').update({ cancelado: true }).eq('id', itemId);
+                await supabaseClient.from('itens_lista').update({ cancelado: true, comprado: false, substituido: false, preco_pago: null }).eq('id', itemId);
             } else if(acao === 'substituir') {
                 const novoNome = prompt('Nome do item substituto (ex: Cheetos):');
                 const novoEan = prompt('EAN do item substituto:', '');
@@ -842,6 +949,13 @@
                     lista_id: activeLiveListId, ean: novoEan || '', nome: `(Subst.) ${novoNome}`, preco_pago: preco, comprado: true, extra: true, quantidade: 1
                 }]);
             }
+            await loadUserPriceHistory();
+            loadLiveItems();
+        }
+
+        async function estornarItem(itemId) {
+            await supabaseClient.from('itens_lista').update({ comprado: false, cancelado: false, substituido: false, preco_pago: null }).eq('id', itemId);
+            await loadUserPriceHistory();
             loadLiveItems();
         }
 
