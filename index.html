@@ -179,14 +179,18 @@
             </div>
             
             <div class="border-t pt-3 space-y-2 relative">
-                <h4 class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista</h4>
+                <div class="flex justify-between items-center">
+                    <h4 class="font-semibold text-xs text-slate-600 uppercase">Adicionar Item à Lista (Base Obrigatória)</h4>
+                    <button type="button" onclick="toggleManualProductEntry()" id="btn-toggle-manual" class="text-xs text-indigo-600 hover:underline font-medium">Não achei o item</button>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                    <input type="text" id="modal-item-ean" placeholder="EAN (Opcional)" oninput="searchProductByEan(this.value)" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
+                    <input type="text" id="modal-item-ean" placeholder="EAN" oninput="searchProductByEan(this.value)" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none bg-slate-50">
                     
                     <div class="sm:col-span-6 relative">
                         <div class="flex">
-                            <input type="text" id="modal-item-name" placeholder="Nome do Produto ou EAN" oninput="searchProductByNameOrEan(this.value)" autocomplete="off" class="w-full px-3 py-2 border rounded-l-lg text-sm outline-none">
-                            <button type="button" onclick="searchProductByNameOrEan(document.getElementById('modal-item-name').value)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 text-xs font-medium rounded-r-lg transition">🔍 Buscar</button>
+                            <input type="text" id="modal-item-name" placeholder="Digite para buscar na base..." oninput="searchProductByNameOrEan(this.value)" autocomplete="off" class="w-full px-3 py-2 border rounded-l-lg text-sm outline-none bg-slate-50">
+                            <button type="button" onclick="searchProductByNameOrEan(document.getElementById('modal-item-name').value)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 text-xs font-medium rounded-r-lg transition">🔍</button>
                         </div>
                         <!-- Dropdown de Autocomplete / Resultados -->
                         <div id="product-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border rounded-lg shadow-xl max-h-56 overflow-y-auto z-50 text-xs divide-y"></div>
@@ -194,6 +198,9 @@
 
                     <input type="number" id="modal-item-qtd" placeholder="Qtd" value="1" min="1" class="sm:col-span-3 px-3 py-2 border rounded-lg text-sm outline-none">
                 </div>
+                
+                <p id="selection-status-msg" class="text-[11px] text-amber-600 italic">Selecione um produto cadastrado na base de dados para prosseguir.</p>
+
                 <button type="button" onclick="addItemToModalListTemp()" class="w-full bg-slate-800 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-900 transition mt-1">+ Adicionar Item</button>
                 <div id="modal-items-preview" class="divide-y max-h-40 overflow-y-auto border rounded-lg p-2 bg-slate-50 text-xs mt-2"></div>
             </div>
@@ -220,6 +227,8 @@
         let currentLiveItems = [];
         let tempModalItems = [];
         let deletedModalItemIds = [];
+        let isProductSelectedFromBase = false;
+        let isManualMode = false;
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             currentUser = session?.user || null;
@@ -398,20 +407,32 @@
         }
 
         async function searchProductByEan(ean) {
-            if (!ean || ean.length < 3) return;
+            if(isManualMode) return;
+            if (!ean || ean.length < 3) {
+                isProductSelectedFromBase = false;
+                updateSelectionStatus();
+                return;
+            }
             const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean.trim()).maybeSingle();
             
             if (data) {
                 document.getElementById('modal-item-name').value = data.nome;
                 document.getElementById('modal-item-marca').value = data.marca || '';
                 document.getElementById('modal-item-imagem').value = data.imagem_url || '';
+                isProductSelectedFromBase = true;
+            } else {
+                isProductSelectedFromBase = false;
             }
+            updateSelectionStatus();
         }
 
         async function searchProductByNameOrEan(termo) {
+            if(isManualMode) return;
             const dropdown = document.getElementById('product-suggestions');
             if (!termo || termo.trim().length < 1) {
                 dropdown.classList.add('hidden');
+                isProductSelectedFromBase = false;
+                updateSelectionStatus();
                 return;
             }
 
@@ -436,8 +457,10 @@
             const data = Array.from(mapUnico.values());
             
             if (!data || data.length === 0) {
-                dropdown.innerHTML = '<div class="p-3 text-slate-400 text-center">Nenhum produto encontrado na base.</div>';
+                dropdown.innerHTML = '<div class="p-3 text-slate-400 text-center">Nenhum produto encontrado. Clique em "Não achei o item" para cadastrar manualmente.</div>';
                 dropdown.classList.remove('hidden');
+                isProductSelectedFromBase = false;
+                updateSelectionStatus();
                 return;
             }
 
@@ -462,6 +485,48 @@
             document.getElementById('modal-item-marca').value = marca;
             document.getElementById('modal-item-imagem').value = imagem_url;
             document.getElementById('product-suggestions').classList.add('hidden');
+            isProductSelectedFromBase = true;
+            updateSelectionStatus();
+        }
+
+        function toggleManualProductEntry() {
+            isManualMode = !isManualMode;
+            const btnToggle = document.getElementById('btn-toggle-manual');
+            const nameInput = document.getElementById('modal-item-name');
+            const eanInput = document.getElementById('modal-item-ean');
+
+            if(isManualMode) {
+                btnToggle.textContent = 'Voltar à busca na base';
+                btnToggle.className = 'text-xs text-amber-600 hover:underline font-semibold';
+                isProductSelectedFromBase = true; // Libera o cadastro avulso
+                nameInput.removeAttribute('readonly');
+                eanInput.removeAttribute('readonly');
+                nameInput.placeholder = 'Nome do produto avulso...';
+                document.getElementById('product-suggestions').classList.add('hidden');
+                document.getElementById('selection-status-msg').textContent = 'Modo de cadastro avulso ativado.';
+                document.getElementById('selection-status-msg').className = 'text-[11px] text-amber-600 font-semibold';
+            } else {
+                btnToggle.textContent = 'Não achei o item';
+                btnToggle.className = 'text-xs text-indigo-600 hover:underline font-medium';
+                isProductSelectedFromBase = false;
+                nameInput.value = '';
+                eanInput.value = '';
+                document.getElementById('modal-item-marca').value = '';
+                document.getElementById('modal-item-imagem').value = '';
+                nameInput.placeholder = 'Digite para buscar na base...';
+                updateSelectionStatus();
+            }
+        }
+
+        function updateSelectionStatus() {
+            const msgEl = document.getElementById('selection-status-msg');
+            if(isProductSelectedFromBase) {
+                msgEl.textContent = '✔ Produto válido selecionado.';
+                msgEl.className = 'text-[11px] text-emerald-600 font-medium';
+            } else {
+                msgEl.textContent = 'Selecione um produto cadastrado na base de dados para prosseguir.';
+                msgEl.className = 'text-[11px] text-amber-600 italic';
+            }
         }
 
         function openCreateListModal(id = '', titulo = '') {
@@ -469,11 +534,16 @@
             document.getElementById('modal-list-name-input').value = titulo;
             tempModalItems = [];
             deletedModalItemIds = [];
+            isManualMode = false;
+            isProductSelectedFromBase = false;
+            document.getElementById('btn-toggle-manual').textContent = 'Não achei o item';
+            document.getElementById('btn-toggle-manual').className = 'text-xs text-indigo-600 hover:underline font-medium';
             document.getElementById('modal-item-ean').value = '';
             document.getElementById('modal-item-name').value = '';
             document.getElementById('modal-item-imagem').value = '';
             document.getElementById('modal-item-marca').value = '';
             document.getElementById('product-suggestions').classList.add('hidden');
+            updateSelectionStatus();
             document.getElementById('modal-items-preview').innerHTML = '<span class="text-slate-400">Nenhum item adicionado ainda.</span>';
             document.getElementById('list-modal').classList.remove('hidden');
             if(id) {
@@ -496,43 +566,38 @@
             document.getElementById('list-modal').classList.add('hidden');
         }
 
-        async function addItemToModalListTemp() {
-            let ean = document.getElementById('modal-item-ean').value.trim();
-            let nome = document.getElementById('modal-item-name').value.trim();
-            let marca = document.getElementById('modal-item-marca').value.trim();
-            let imagem_url = document.getElementById('modal-item-imagem').value.trim();
-            const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;
-            
-            if(!ean && !nome) {
-                return alert('Preencha pelo menos o EAN ou o Nome do produto.');
+        function addItemToModalListTemp() {
+            if(!isProductSelectedFromBase) {
+                return alert('É obrigatório selecionar um item válido da base ou utilizar o botão "Não achei o item" para cadastro avulso.');
             }
 
-            if(ean && !nome) {
-                const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean).maybeSingle();
-                if(data) {
-                    nome = data.nome;
-                    marca = data.marca || '';
-                    imagem_url = data.imagem_url || '';
-                } else {
-                    nome = `Produto (${ean})`;
-                }
-            } else if(nome && !ean) {
-                const { data } = await supabaseClient.from('produtos_base').select('*').ilike('nome', nome).maybeSingle();
-                if(data) {
-                    ean = data.ean || '';
-                    marca = data.marca || '';
-                    imagem_url = data.imagem_url || '';
-                }
+            const ean = document.getElementById('modal-item-ean').value.trim();
+            const nome = document.getElementById('modal-item-name').value.trim();
+            const marca = document.getElementById('modal-item-marca').value.trim();
+            const imagem_url = document.getElementById('modal-item-imagem').value.trim();
+            const quantidade = parseInt(document.getElementById('modal-item-qtd').value) || 1;
+            
+            if(!nome) {
+                return alert('Informe o nome do produto.');
             }
 
             tempModalItems.push({ ean, nome, marca, imagem_url, quantidade, salvoNoBanco: false });
             
+            // Reseta os campos para o próximo item mantendo a regra da base
             document.getElementById('modal-item-ean').value = '';
             document.getElementById('modal-item-name').value = '';
             document.getElementById('modal-item-marca').value = '';
             document.getElementById('modal-item-imagem').value = '';
             document.getElementById('modal-item-qtd').value = '1';
             document.getElementById('product-suggestions').classList.add('hidden');
+            
+            if(isManualMode) {
+                toggleManualProductEntry(); // Reseta o modo manual após adicionar
+            } else {
+                isProductSelectedFromBase = false;
+                updateSelectionStatus();
+            }
+
             renderModalItemsPreview();
         }
 
@@ -572,7 +637,6 @@
 
             let currentListId = listaId;
 
-            // 1. Cria ou atualiza a lista principal
             if(!currentListId) {
                 const { data, error } = await supabaseClient.from('minhas_listas').insert([{
                     user_id: currentUser.id, titulo
@@ -583,15 +647,13 @@
                 await supabaseClient.from('minhas_listas').update({ titulo }).eq('id', currentListId);
             }
 
-            // 2. Remove itens deletados no modal se houverem
             if(deletedModalItemIds.length > 0) {
                 await supabaseClient.from('itens_lista').delete().in('id', deletedModalItemIds);
             }
 
-            // 3. Salva explicitamente todos os itens novos ou pendentes
             for(let item of tempModalItems) {
                 if(!item.salvoNoBanco) {
-                    const { error: insertError } = await supabaseClient.from('itens_lista').insert([{
+                    await supabaseClient.from('itens_lista').insert([{
                         lista_id: currentListId, 
                         ean: item.ean || '', 
                         nome: item.nome, 
@@ -599,10 +661,6 @@
                         imagem_url: item.imagem_url || '', 
                         quantidade: parseInt(item.quantidade) || 1
                     }]);
-
-                    if (insertError) {
-                        console.error('Erro ao inserir item:', insertError.message);
-                    }
                 }
             }
 
