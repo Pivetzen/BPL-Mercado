@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartMarket - Minhas Listas</title>
+    <title>BPL SmartMarket</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -12,7 +12,7 @@
     <!-- TELA DE LOGIN -->
     <div id="auth-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-            <h1 class="text-2xl font-bold text-center text-slate-900 mb-2">SmartMarket</h1>
+            <h1 class="text-2xl font-bold text-center text-slate-900 mb-2">BPL - SmartMarket</h1>
             <p class="text-sm text-slate-500 text-center mb-6">Faça login para acessar suas listas</p>
             
             <form id="auth-form" class="space-y-4" onsubmit="return false;">
@@ -39,7 +39,7 @@
             <h1 class="text-2xl font-bold text-red-600" id="status-title">Acesso Restrito</h1>
             <p class="text-sm text-slate-600" id="status-desc">Sua conta está bloqueada ou o período de acesso expirou.</p>
             <div class="space-y-2 pt-2">
-                <a href="https://wa.me/5585987804628?text=Olá,%20gostaria%20de%20regularizar%20meu%20acesso%20ao%20SmartMarket." target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+                <a href="https://wa.me/5585987804628?text=Olá,%20gostaria%20de%20regularizar%20meu%20acesso%20ao%20BPL SmartMarket." target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition flex items-center justify-center gap-2">
                     <span>Contatar Administrador (WhatsApp)</span>
                 </a>
                 <button onclick="logout()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 rounded-lg transition">Sair / Trocar Conta</button>
@@ -52,7 +52,7 @@
         <header class="bg-indigo-600 text-white shadow">
             <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div>
-                    <h1 class="font-bold text-lg">SmartMarket</h1>
+                    <h1 class="font-bold text-lg">BPL - SmartMarket</h1>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span id="user-badge" class="text-xs bg-indigo-700 px-2 py-0.5 rounded-full font-medium"></span>
                         <span id="user-validity-badge" class="text-xs bg-indigo-800/80 px-2 py-0.5 rounded-full hidden"></span>
@@ -218,7 +218,7 @@
                 <!-- Aviso e Botão de Sugerir Inclusão via WhatsApp -->
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1">
                     <p id="selection-status-msg" class="text-[11px] text-amber-600 italic">Selecione um produto cadastrado na base de dados para prosseguir.</p>
-                    <a href="https://wa.me/5585987804628?text=Olá,%20gostaria%20de%20sugerir%20a%20inclusão%20de%20um%20novo%20item%20no%20SmartMarket.%20Seguem%20as%20fotos%20do%20produto%20e%20do%20código%20de%20barras:" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
+                    <a href="https://wa.me/5585987804628?text=Olá,%20gostaria%20de%20sugerir%20a%20inclusão%20de%20um%20novo%20item%20no%20BPL SmartMarket.%20Seguem%20as%20fotos%20do%20produto%20e%20do%20código%20de%20barras:" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
                         <span>💬 Sugerir Inclusão de Item</span>
                     </a>
                 </div>
