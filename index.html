@@ -318,12 +318,11 @@
             if(!listas || listas.length === 0) return;
             const listaIds = listas.map(l => l.id);
 
-            // Dentro da sua função editList ou onde você carrega os itens do modal de edição:
             const { data: itens } = await supabaseClient
                 .from('itens_lista')
                 .select('*')
-                .eq('lista_id', listaId)
-            .neq('extra', true); // <-- Importante para não exibir os extras ao editar a lista base
+                .in('lista_id', listaIds)
+                .neq('extra', true);
             
             userPriceHistory = {};
             if(itens) {
@@ -378,7 +377,7 @@
         }
 
         // --- MÓDULO MINHAS LISTAS ---
-async function loadUserLists() {
+        async function loadUserLists() {
             const container = document.getElementById('user-lists-container');
             const btnNew = document.getElementById('btn-new-list');
             if (!container) return;
@@ -405,7 +404,6 @@ async function loadUserLists() {
 
             let html = '';
             for (let lista of data) {
-                // Busca apenas os itens que NÃO são avulsos/extras (.neq('extra', true))
                 const { data: itens } = await supabaseClient.from('itens_lista').select('*').eq('lista_id', lista.id).neq('extra', true);
                 const totalItens = itens ? itens.length : 0;
 
@@ -781,7 +779,6 @@ async function loadUserLists() {
 
         async function finishLiveSession() {
             if (activeLiveListId) {
-                // Reseta todos os itens da lista ativa para o estado pendente no banco de dados
                 await supabaseClient.from('itens_lista').update({
                     comprado: false,
                     cancelado: false,
@@ -803,21 +800,107 @@ async function loadUserLists() {
             renderLiveItemsUI();
         }
 
+        async function addExtraItem() {
+            const nome = document.getElementById('extra-nome').value.trim();
+            const qtdStr = document.getElementById('extra-qtd').value;
+            const precoStr = document.getElementById('extra-preco').value;
+
+            if (!nome || !precoStr) {
+                return alert('Preencha o nome e o preço unitário do item extra.');
+            }
+
+            const quantidade = parseInt(qtdStr) || 1;
+            const precoUnitario = parseFloat(precoStr.replace(',', '.'));
+            
+            if (isNaN(precoUnitario) || precoUnitario < 0) {
+                return alert('Preço unitário inválido.');
+            }
+
+            const precoTotalCalculado = precoUnitario * quantidade;
+
+            const { error } = await supabaseClient.from('itens_lista').insert([{
+                lista_id: activeLiveListId,
+                nome: nome,
+                quantidade: quantidade,
+                preco_pago: precoTotalCalculado,
+                comprado: true,
+                extra: true,
+                ean: ''
+            }]);
+
+            if (error) {
+                return alert('Erro ao adicionar item extra.');
+            }
+
+            document.getElementById('extra-nome').value = '';
+            document.getElementById('extra-qtd').value = '1';
+            document.getElementById('extra-preco').value = '';
+
+            loadLiveItems();
+        }
+
+        function renderExtraItems(items) {
+            const extraContainer = document.getElementById('extra-items-container');
+            const extraCard = document.getElementById('extra-items-card');
+            
+            const extras = items.filter(i => i.extra === true);
+
+            if (extras.length === 0) {
+                extraCard.classList.add('hidden');
+                extraContainer.innerHTML = '';
+                return;
+            }
+
+            extraCard.classList.remove('hidden');
+            extraContainer.innerHTML = extras.map(i => {
+                const qtd = i.quantidade || 1;
+                const precoTotal = i.preco_pago || 0;
+                const precoUnitario = precoTotal / qtd;
+
+                return `
+                    <div class="flex items-center justify-between bg-slate-50 border border-slate-100 p-2.5 rounded-lg text-xs">
+                        <div>
+                            <p class="font-bold text-slate-800">${i.nome}</p>
+                            <p class="text-slate-500">Qtd: ${qtd} • Preço Unit.: R$ ${precoUnitario.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-semibold text-slate-700">Total: R$ ${precoTotal.toFixed(2).replace('.', ',')}</span>
+                            <button onclick="deleteExtraItem('${i.id}')" class="text-red-500 hover:text-red-700 font-bold px-1">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function deleteExtraItem(itemId) {
+            await supabaseClient.from('itens_lista').delete().eq('id', itemId);
+            loadLiveItems();
+        }
+
         function renderLiveItemsUI() {
             const listEl = document.getElementById('live-items-list');
             let compradosCount = 0;
             let totalCart = 0;
             let extrasCount = 0;
 
-            if(currentLiveItems.length === 0) {
+            renderExtraItems(currentLiveItems);
+
+            currentLiveItems.filter(i => i.extra === true).forEach(extra => {
+                extrasCount++;
+                totalCart += (extra.preco_pago || 0);
+            });
+
+            const itensNormais = currentLiveItems.filter(i => !i.extra);
+
+            if(itensNormais.length === 0 && currentLiveItems.length === 0) {
                 listEl.innerHTML = '<p class="p-4 text-sm text-slate-400 text-center">Nenhum item nesta lista.</p>';
                 document.getElementById('live-progress-count').textContent = '0 / 0 comprados';
-                document.getElementById('live-total-cart').textContent = 'R$ 0,00';
-                document.getElementById('live-total-extras').textContent = '0';
+                document.getElementById('live-total-cart').textContent = `R$ ${totalCart.toFixed(2)}`;
+                document.getElementById('live-total-extras').textContent = extrasCount;
                 return;
             }
 
-            listEl.innerHTML = currentLiveItems.map(item => {
+            listEl.innerHTML = itensNormais.map(item => {
                 let statusStyle = '';
                 let statusText = '';
                 let historicoPrecoTexto = '';
@@ -853,15 +936,6 @@ async function loadUserLists() {
                 } else if(item.substituido) {
                     statusStyle = 'line-through text-amber-500';
                     statusText = `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">Substituído</span>`;
-                } else if(item.extra) {
-                    extrasCount++;
-                    totalCart += (item.preco_pago || 0);
-                    statusText = `
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-medium">Extra: R$ ${(item.preco_pago || 0).toFixed(2)}</span>
-                            <button onclick="estornarItem('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2 py-1 rounded font-medium transition">↩ Estornar</button>
-                        </div>
-                    `;
                 } else {
                     statusText = `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Pendente (Clique para comprar)</span>`;
                 }
@@ -890,7 +964,7 @@ async function loadUserLists() {
                 `;
             }).join('');
 
-            document.getElementById('live-progress-count').textContent = `${compradosCount} / ${currentLiveItems.length} comprados`;
+            document.getElementById('live-progress-count').textContent = `${compradosCount} / ${itensNormais.length} comprados`;
             document.getElementById('live-total-cart').textContent = `R$ ${totalCart.toFixed(2)}`;
             document.getElementById('live-total-extras').textContent = extrasCount;
         }
@@ -898,39 +972,6 @@ async function loadUserLists() {
         async function handleItemClickAction(itemId, jaProcessado) {
             if(jaProcessado) return;
             markItemAction(itemId, 'comprar');
-        }
-
-        async function registerLiveExtraItem() {
-            const ean = document.getElementById('live-ean').value.trim();
-            const nome = document.getElementById('live-name').value.trim();
-            const preco = parseFloat(document.getElementById('live-price').value);
-
-            if((!ean && !nome) || isNaN(preco)) return alert('Preencha EAN ou Nome e o Preço do item extra.');
-
-            let imagem_url = '';
-            let marca = '';
-            let finalNome = nome;
-
-            if(ean) {
-                const { data } = await supabaseClient.from('produtos_base').select('*').eq('ean', ean).maybeSingle();
-                if(data) {
-                    marca = data.marca || '';
-                    imagem_url = data.imagem_url || '';
-                    if(!finalNome) finalNome = data.nome;
-                }
-            }
-
-            if(!finalNome) finalNome = `Item Extra (${ean})`;
-
-            await supabaseClient.from('itens_lista').insert([{
-                lista_id: activeLiveListId, ean, nome: finalNome, marca, imagem_url, preco_pago: preco, comprado: true, extra: true, quantidade: 1
-            }]);
-
-            document.getElementById('live-ean').value = '';
-            document.getElementById('live-name').value = '';
-            document.getElementById('live-price').value = '';
-            await loadUserPriceHistory();
-            loadLiveItems();
         }
 
         async function markItemAction(itemId, acao) {
